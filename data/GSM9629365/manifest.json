@@ -1,0 +1,535 @@
+{
+  "format": "sparse-doubled-average-ranks-v1",
+  "dataset": "GSM9629365",
+  "created_utc": "2026-10-09T14:26:21.937226+00:00",
+  "n_cells": 825115,
+  "n_genes": 18646,
+  "n_celltypes": 22,
+  "seed": 20261008,
+  "min_cells": 0,
+  "sampling": {
+    "method": "spatial",
+    "levels": [
+      {
+        "grid_width": 16,
+        "added": 3466,
+        "cumulative": 3466
+      },
+      {
+        "grid_width": 8,
+        "added": 9893,
+        "cumulative": 13359
+      },
+      {
+        "grid_width": 4,
+        "added": 39076,
+        "cumulative": 52435
+      },
+      {
+        "grid_width": 2,
+        "added": 155084,
+        "cumulative": 207519
+      },
+      {
+        "grid_width": 1,
+        "added": 617596,
+        "cumulative": 825115
+      }
+    ]
+  },
+  "progressive_batch_size": 32768,
+  "source": {
+    "url": "https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM9629nnn/GSM9629365/suppl/GSM9629365_CS23_E2S8_HESTA.h5ad",
+    "bytes": 17866464523,
+    "sha256": "7196d66306e6706feb18e8995f16be7baa79265bdc369d03bacc38fb73234155",
+    "matrix": "layers/counts"
+  },
+  "hgnc": {
+    "url": "https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt",
+    "sha256": "64fcdfcdf9bc0853ec502e0e4c7d6eb12647b2ca8b0e635ea04bdb584856baf7",
+    "n_protein_coding": 19298
+  },
+  "gene_mapping_counts": {
+    "not_protein_coding_or_unmapped": 34651,
+    "retained": 18657,
+    "ambiguous": 3
+  },
+  "retained_mapping_methods": {
+    "approved_symbol": 18058,
+    "previous_symbol": 599
+  },
+  "ranks": {
+    "direction": "ascending: larger rank means higher expression",
+    "ties": "average",
+    "scale": 2,
+    "zeros": "all unstored genes have rank zero_rank2 / 2; stored ranks are absolute",
+    "universe": "HGNC approved protein-coding genes mapped from source and passing min_cells; absent source genes excluded",
+    "duplicate_genes": "sum counts before ranking",
+    "auroc": "(sum(rank of set) - k*(k+1)/2) / (k*(G-k))"
+  },
+  "coordinates": {
+    "source": "obs.x, obs.y",
+    "units": "source units, not converted to micrometres",
+    "obsm_spatial_equal": true,
+    "bbox": [
+      3050.0,
+      8000.0,
+      80250.0,
+      60500.0
+    ],
+    "grid": 8
+  },
+  "source_var_detection_counts_stale": true,
+  "validation": {
+    "exact_rank_and_pairwise_auc_rows": 64,
+    "all_shards_roundtripped": true,
+    "layouts_each_cover_all_cells_once": true,
+    "median_shard_read_and_verify_seconds": 1.6361020144995564
+  },
+  "software": {
+    "python": "3.13.16",
+    "numpy": "2.1.3",
+    "pandas": "3.0.6",
+    "scipy": "1.16.3",
+    "h5py": "3.14.0"
+  },
+  "files": [
+    {
+      "path": "genes.parquet",
+      "bytes": 865630,
+      "sha256": "15772606de180613ad5780368846477c859f052af193f89aeb3af9244da5cef9"
+    },
+    {
+      "path": "cells.parquet",
+      "bytes": 62128463,
+      "sha256": "b03f31bd4bc5a1567fa5a7e18b4efaa888ab6320006aa139f2b863003266aa71"
+    },
+    {
+      "path": "progressive/00000.npz",
+      "bytes": 50943245,
+      "sha256": "d3379dd43a427de558c9dab26a6e935901f17902ce2d2ff7f346f904e6b22e2d",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3100.0,
+        8050.0,
+        80250.0,
+        60500.0
+      ],
+      "sampling_order_min": 0,
+      "sampling_order_max": 32767
+    },
+    {
+      "path": "progressive/00001.npz",
+      "bytes": 51544805,
+      "sha256": "89544e2cd506066bb725ae7f7684227bf52b7e68a91ee52f4a03a1323674c14a",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8000.0,
+        80250.0,
+        60500.0
+      ],
+      "sampling_order_min": 32768,
+      "sampling_order_max": 65535
+    },
+    {
+      "path": "progressive/00002.npz",
+      "bytes": 51337301,
+      "sha256": "d307813bd1ce128606d00098e2a987b5c1ddc75aca9fef773ea8b687481f97e9",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8000.0,
+        80200.0,
+        60500.0
+      ],
+      "sampling_order_min": 65536,
+      "sampling_order_max": 98303
+    },
+    {
+      "path": "progressive/00003.npz",
+      "bytes": 51186275,
+      "sha256": "aef31dff0ebd384c225d182b62748f0699ae179836d36b46eff9178304f745f6",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8000.0,
+        80250.0,
+        60450.0
+      ],
+      "sampling_order_min": 98304,
+      "sampling_order_max": 131071
+    },
+    {
+      "path": "progressive/00004.npz",
+      "bytes": 51603233,
+      "sha256": "cd37c2abb6781499e01eec480955891bb750051da256e4908ef17cff6c12e71f",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8000.0,
+        80200.0,
+        60500.0
+      ],
+      "sampling_order_min": 131072,
+      "sampling_order_max": 163839
+    },
+    {
+      "path": "progressive/00005.npz",
+      "bytes": 51659198,
+      "sha256": "8c63543c587ce98b758e2128b648b8279dfc72151d53d3bd6d0cce0a83cfb2de",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8000.0,
+        80250.0,
+        60500.0
+      ],
+      "sampling_order_min": 163840,
+      "sampling_order_max": 196607
+    },
+    {
+      "path": "progressive/00006.npz",
+      "bytes": 51321153,
+      "sha256": "4ac6e4eb3c03b52f73dec4a814c9f589d91875bd10226e96b20c970852401670",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8050.0,
+        80200.0,
+        60450.0
+      ],
+      "sampling_order_min": 196608,
+      "sampling_order_max": 229375
+    },
+    {
+      "path": "progressive/00007.npz",
+      "bytes": 50954596,
+      "sha256": "cf93c10a9abaa696a89dbb1c4d4f18d6000cd773fb468031780b95c4ae0bcd3d",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3100.0,
+        8000.0,
+        80200.0,
+        60500.0
+      ],
+      "sampling_order_min": 229376,
+      "sampling_order_max": 262143
+    },
+    {
+      "path": "progressive/00008.npz",
+      "bytes": 50737773,
+      "sha256": "2b671fb7423639e653df862a6d486a5d79688dc6787507f2c4107030187a331b",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8000.0,
+        80200.0,
+        60450.0
+      ],
+      "sampling_order_min": 262144,
+      "sampling_order_max": 294911
+    },
+    {
+      "path": "progressive/00009.npz",
+      "bytes": 50676559,
+      "sha256": "a7be3c7c622796ec521371f4cb78f3c14f479578a33d4b1792e18157116eeab1",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8000.0,
+        80150.0,
+        60500.0
+      ],
+      "sampling_order_min": 294912,
+      "sampling_order_max": 327679
+    },
+    {
+      "path": "progressive/00010.npz",
+      "bytes": 50704537,
+      "sha256": "86788d19a0980f13017ffe439c9693ac00bf037bfcc94e792c5b7de3798d1e79",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8000.0,
+        80150.0,
+        60400.0
+      ],
+      "sampling_order_min": 327680,
+      "sampling_order_max": 360447
+    },
+    {
+      "path": "progressive/00011.npz",
+      "bytes": 50596841,
+      "sha256": "ef9597ed85b9ee631e33d6f7be413ae8aab26ad74ed55b8e1e2a0e6677426bab",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8000.0,
+        80200.0,
+        60500.0
+      ],
+      "sampling_order_min": 360448,
+      "sampling_order_max": 393215
+    },
+    {
+      "path": "progressive/00012.npz",
+      "bytes": 50641697,
+      "sha256": "12271a9f31d1f56140ee127831a801a91200117cdb137d81ed638c14fb7a7516",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8000.0,
+        80150.0,
+        60400.0
+      ],
+      "sampling_order_min": 393216,
+      "sampling_order_max": 425983
+    },
+    {
+      "path": "progressive/00013.npz",
+      "bytes": 51028564,
+      "sha256": "5a3d94be768e03b610dbdaffe7f5095cf1e43834f773a2b4bf302ee449ed53cb",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8050.0,
+        80200.0,
+        60500.0
+      ],
+      "sampling_order_min": 425984,
+      "sampling_order_max": 458751
+    },
+    {
+      "path": "progressive/00014.npz",
+      "bytes": 50876331,
+      "sha256": "f285eafd33c02e9a34179d7d4f1f2d97ae415db4960848aad9ef5f9d225fe7d9",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8000.0,
+        80150.0,
+        60450.0
+      ],
+      "sampling_order_min": 458752,
+      "sampling_order_max": 491519
+    },
+    {
+      "path": "progressive/00015.npz",
+      "bytes": 50570559,
+      "sha256": "68d96e61c37fd4a62294e2d25f2d97ea5e59326c5a62c26a596ddd71a7349cb0",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8000.0,
+        80250.0,
+        60450.0
+      ],
+      "sampling_order_min": 491520,
+      "sampling_order_max": 524287
+    },
+    {
+      "path": "progressive/00016.npz",
+      "bytes": 50854140,
+      "sha256": "937cf6d6b4c3fbe7fc156dabebb7de26a7eea959d9fe2aef822fc5619d69392c",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8050.0,
+        80200.0,
+        60500.0
+      ],
+      "sampling_order_min": 524288,
+      "sampling_order_max": 557055
+    },
+    {
+      "path": "progressive/00017.npz",
+      "bytes": 50887880,
+      "sha256": "c890ab65b7246431dd4995d63bd1bd8549d3f5834a7aa18df3c7457144baa8ed",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8000.0,
+        80250.0,
+        60450.0
+      ],
+      "sampling_order_min": 557056,
+      "sampling_order_max": 589823
+    },
+    {
+      "path": "progressive/00018.npz",
+      "bytes": 50789711,
+      "sha256": "147e0c7aec26b8d662d20d6d12cff34d4a4113b200b00f714c22ee79a4e4319e",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8000.0,
+        80200.0,
+        60400.0
+      ],
+      "sampling_order_min": 589824,
+      "sampling_order_max": 622591
+    },
+    {
+      "path": "progressive/00019.npz",
+      "bytes": 50806318,
+      "sha256": "4d6a4b8b88a2e9e49cf4a5a2ffff1f9b49cfc4f11efa16ba48fbf07f5afbb3f5",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8100.0,
+        80200.0,
+        60450.0
+      ],
+      "sampling_order_min": 622592,
+      "sampling_order_max": 655359
+    },
+    {
+      "path": "progressive/00020.npz",
+      "bytes": 51021319,
+      "sha256": "0281f46c30b043f05cc1bd1f175148821c3e193180f4a61eff366c4c0ddc3831",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8000.0,
+        80250.0,
+        60450.0
+      ],
+      "sampling_order_min": 655360,
+      "sampling_order_max": 688127
+    },
+    {
+      "path": "progressive/00021.npz",
+      "bytes": 50621850,
+      "sha256": "449e216ffc5c71cc5f911a8b31f49bf5cd3722d5e30426b971febf718a85a3d9",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8100.0,
+        80250.0,
+        60400.0
+      ],
+      "sampling_order_min": 688128,
+      "sampling_order_max": 720895
+    },
+    {
+      "path": "progressive/00022.npz",
+      "bytes": 50765178,
+      "sha256": "be74685fcc7733b19300c52f32b1e5d71ad25180bcd0b7f817f4ddc2d17ca54b",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8000.0,
+        80250.0,
+        60500.0
+      ],
+      "sampling_order_min": 720896,
+      "sampling_order_max": 753663
+    },
+    {
+      "path": "progressive/00023.npz",
+      "bytes": 50630557,
+      "sha256": "97c46067dacea2ccb918dd1b41e3f6aecee7ffb7110d956cfd2aaa5d5a81c837",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8050.0,
+        80250.0,
+        60500.0
+      ],
+      "sampling_order_min": 753664,
+      "sampling_order_max": 786431
+    },
+    {
+      "path": "progressive/00024.npz",
+      "bytes": 51014276,
+      "sha256": "1b62f79fda32625308df42495b04e538dca32e372cb81aaa802bf67bb14e4376",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        3050.0,
+        8150.0,
+        80150.0,
+        60450.0
+      ],
+      "sampling_order_min": 786432,
+      "sampling_order_max": 819199
+    },
+    {
+      "path": "progressive/00025.npz",
+      "bytes": 9103183,
+      "sha256": "85a8e804d2b53b00a55e9939264b0bc84ce57705fe7cd076782ad66cedef5ddf",
+      "layout": "progressive",
+      "n_cells": 5915,
+      "bbox": [
+        3300.0,
+        8050.0,
+        80250.0,
+        60250.0
+      ],
+      "sampling_order_min": 819200,
+      "sampling_order_max": 825114
+    }
+  ],
+  "progressive": [
+    "progressive/00000.npz",
+    "progressive/00001.npz",
+    "progressive/00002.npz",
+    "progressive/00003.npz",
+    "progressive/00004.npz",
+    "progressive/00005.npz",
+    "progressive/00006.npz",
+    "progressive/00007.npz",
+    "progressive/00008.npz",
+    "progressive/00009.npz",
+    "progressive/00010.npz",
+    "progressive/00011.npz",
+    "progressive/00012.npz",
+    "progressive/00013.npz",
+    "progressive/00014.npz",
+    "progressive/00015.npz",
+    "progressive/00016.npz",
+    "progressive/00017.npz",
+    "progressive/00018.npz",
+    "progressive/00019.npz",
+    "progressive/00020.npz",
+    "progressive/00021.npz",
+    "progressive/00022.npz",
+    "progressive/00023.npz",
+    "progressive/00024.npz",
+    "progressive/00025.npz"
+  ],
+  "spatial": [],
+  "unused_data_cleanup": {
+    "completed_utc": "2026-10-09T14:34:38.442268+00:00",
+    "removed_files": [
+      "gene_mapping.parquet",
+      "hgnc_protein_coding.parquet"
+    ],
+    "note": "Historical reports predate cleanup. Active ranks and cell/gene metadata are unchanged."
+  }
+}
