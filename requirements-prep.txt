@@ -1,0 +1,4 @@
+-r requirements-reader.txt
+anndata>=0.10
+scipy>=1.11
+h5py>=3.10

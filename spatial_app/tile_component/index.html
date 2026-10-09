@@ -1,0 +1,29 @@
+<!doctype html>
+<html><head><meta charset="UTF-8"><style>html,body{margin:0;background:white;}#plot{width:100%;height:680px;}</style>
+<script src="plotly.min.js"></script></head><body><div id="plot"></div>
+<script>
+const plot=document.getElementById('plot');
+const send=(type,extra={})=>parent.postMessage({isStreamlitMessage:true,type,...extra},'*');
+let revision=null, chain=Promise.resolve();
+window.addEventListener('message',event=>{
+ if(event.source!==parent || event.data.type!=='streamlit:render')return;
+ const args=event.data.args;
+ chain=chain.then(async()=>{
+  const fig=JSON.parse(args.figure);
+  // Preserve the actual current viewport, including user pan/zoom, when only
+  // the colours or completed scores change. A dataset/orientation change resets.
+  if(revision===fig.layout.uirevision && plot._fullLayout){
+   fig.layout.xaxis.range=plot._fullLayout.xaxis.range.slice();
+   fig.layout.yaxis.range=plot._fullLayout.yaxis.range.slice();
+   fig.layout.xaxis.autorange=false; fig.layout.yaxis.autorange=false;
+  }
+  revision=fig.layout.uirevision;
+  await Plotly.react(plot,fig.data,fig.layout,{responsive:true,scrollZoom:true,displaylogo:false,
+    modeBarButtonsToRemove:['select2d','lasso2d'],toImageButtonOptions:{filename:args.filename,scale:2}});
+  send('streamlit:setFrameHeight',{height:680});
+ }).catch(error=>{plot.textContent='Unable to render spatial tiles: '+error.message;});
+});
+new ResizeObserver(()=>{if(plot._fullLayout)Plotly.Plots.resize(plot);}).observe(document.body);
+send('streamlit:componentReady',{apiVersion:1});
+send('streamlit:setFrameHeight',{height:680});
+</script></body></html>

@@ -1,0 +1,166 @@
+{
+  "format": "sparse-doubled-average-ranks-v1",
+  "dataset": "GSM9629296",
+  "created_utc": "2026-10-09T12:47:31.993582+00:00",
+  "n_cells": 13257,
+  "n_genes": 17799,
+  "n_celltypes": 19,
+  "seed": 20261008,
+  "min_cells": 0,
+  "source": {
+    "url": "https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM9629nnn/GSM9629296/suppl/GSM9629296_CS12-13_E2S3_HESTA.h5ad",
+    "bytes": 740469411,
+    "sha256": "30aa637d8e1dbb9554defa1d1eaa1c024b84c82858ed5e7321f03dd73de36051",
+    "matrix": "layers/counts"
+  },
+  "hgnc": {
+    "url": "https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt",
+    "sha256": "8bf6f686e640dbc864a346484626953621b0500d900d26cd085a35c2782d725d",
+    "n_protein_coding": 19299
+  },
+  "gene_mapping_counts": {
+    "not_protein_coding_or_unmapped": 24454,
+    "retained": 17809,
+    "ambiguous": 3
+  },
+  "retained_mapping_methods": {
+    "approved_symbol": 17245,
+    "previous_symbol": 564
+  },
+  "ranks": {
+    "direction": "ascending: larger rank means higher expression",
+    "ties": "average",
+    "scale": 2,
+    "zeros": "all unstored genes have rank zero_rank2 / 2; stored ranks are absolute",
+    "universe": "HGNC approved protein-coding genes mapped from source and passing min_cells; absent source genes excluded",
+    "duplicate_genes": "sum counts before ranking",
+    "auroc": "(sum(rank of set) - k*(k+1)/2) / (k*(G-k))"
+  },
+  "coordinates": {
+    "source": "obs.x, obs.y",
+    "units": "source units, not converted to micrometres",
+    "obsm_spatial_equal": true,
+    "bbox": [
+      6200.0,
+      10050.0,
+      16200.0,
+      21250.0
+    ],
+    "grid": 8
+  },
+  "source_var_detection_counts_stale": true,
+  "validation": {
+    "exact_rank_and_pairwise_auc_rows": 64,
+    "all_shards_roundtripped": true,
+    "layouts_each_cover_all_cells_once": true,
+    "median_shard_read_and_verify_seconds": 0.041360192999945866
+  },
+  "software": {
+    "python": "3.13.16",
+    "numpy": "2.1.3",
+    "pandas": "3.0.6",
+    "scipy": "1.16.3",
+    "h5py": "3.14.0"
+  },
+  "files": [
+    {
+      "path": "genes.parquet",
+      "bytes": 738677,
+      "sha256": "e2a72e361bb7b228cd295e5be275fca80dab57ea608633bff3da919737607423"
+    },
+    {
+      "path": "progressive/00000.npz",
+      "layout": "progressive",
+      "bytes": 31927674,
+      "sha256": "5ac2a090b19c633124ee6e17d6825ea5b6f1a81f3ae42a69b1d32e634c73cd61",
+      "n_cells": 8192,
+      "bbox": [
+        6200.0,
+        10050.0,
+        16200.0,
+        21250.0
+      ],
+      "sampling_order_min": 0,
+      "sampling_order_max": 8191
+    },
+    {
+      "path": "progressive/00001.npz",
+      "layout": "progressive",
+      "bytes": 19762784,
+      "sha256": "0661bf0adca0c093f2579a3879ee170dad481713c2b5b435f476380ac0056943",
+      "n_cells": 5065,
+      "bbox": [
+        6200.0,
+        10050.0,
+        16150.0,
+        21250.0
+      ],
+      "sampling_order_min": 8192,
+      "sampling_order_max": 13256
+    },
+    {
+      "path": "cells.parquet",
+      "bytes": 1332209,
+      "sha256": "b56945132747d63f99c7f716ee389eb45d969a3ea0ae0254b98b668164053713"
+    }
+  ],
+  "progressive": [
+    "progressive/00000.npz",
+    "progressive/00001.npz"
+  ],
+  "spatial": [],
+  "progressive_batch_size": 8192,
+  "rebatching": {
+    "previous_manifest_sha256": "5910a1e6ebb68cc22cbcb89dee91150bae1cb3a26a97a09367ae9d4aee883143",
+    "previous_created_utc": "2026-10-09T01:36:15.288204+00:00",
+    "ranks_preserved": true,
+    "all_new_arrays_roundtripped": true,
+    "location": "local",
+    "method": "spatial refinement reorder"
+  },
+  "layout_cleanup": {
+    "completed_utc": "2026-10-09T02:59:17.903804+00:00",
+    "removed_layout": "spatial",
+    "removed_files": 47,
+    "removed_bytes": 51252949,
+    "note": "Only progressive batches retained. Existing validation and Colab transfer reports describe the original export before this cleanup."
+  },
+  "sampling": {
+    "method": "spatial",
+    "levels": [
+      {
+        "grid_width": 16,
+        "added": 78,
+        "cumulative": 78
+      },
+      {
+        "grid_width": 8,
+        "added": 179,
+        "cumulative": 257
+      },
+      {
+        "grid_width": 4,
+        "added": 654,
+        "cumulative": 911
+      },
+      {
+        "grid_width": 2,
+        "added": 2515,
+        "cumulative": 3426
+      },
+      {
+        "grid_width": 1,
+        "added": 9831,
+        "cumulative": 13257
+      }
+    ]
+  },
+  "unused_data_cleanup": {
+    "completed_utc": "2026-10-09T13:11:06.099935+00:00",
+    "removed_files": [
+      "gene_mapping.parquet",
+      "hgnc_protein_coding.parquet"
+    ],
+    "note": "Historical reports predate cleanup. Active ranks and cell/gene metadata are unchanged."
+  }
+}

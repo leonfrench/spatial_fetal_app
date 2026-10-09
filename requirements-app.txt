@@ -1,0 +1,4 @@
+-r requirements-reader.txt
+streamlit>=1.65,<2
+plotly>=6,<7
+scipy>=1.11
