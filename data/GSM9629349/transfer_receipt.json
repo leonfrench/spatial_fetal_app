@@ -1,0 +1,148 @@
+{
+  "verified_utc": "2026-10-09T11:44:10.792103+00:00",
+  "session": "fetal-20261009T113546-6a7de0",
+  "remote_transport": "/content/fetal-runs/GSM9629349-20261009T113546-6a7de0/transport",
+  "verification": "streaming SHA-256 only; all scientific validation performed on Colab",
+  "version": 1,
+  "remote_output": "/content/fetal-runs/GSM9629349-20261009T113546-6a7de0/output",
+  "files": [
+    {
+      "path": "cells.parquet",
+      "bytes": 22108221,
+      "sha256": "e1725dc14352e1e7f44b43233d7a01235d2186be91188f6cfe4afee509db38f6"
+    },
+    {
+      "path": "colab_execution.json",
+      "bytes": 1641,
+      "sha256": "50a8134b2110e6bf650bc5c9853068d58d806f78a66a6efa9f02688724974fab"
+    },
+    {
+      "path": "gene_mapping.parquet",
+      "bytes": 2546625,
+      "sha256": "5ca0eb301f3e1282cd6ffd8138ff37946167bcf5129baeb451cdf7d3d678027c"
+    },
+    {
+      "path": "genes.parquet",
+      "bytes": 841626,
+      "sha256": "73768f1eba890e6ef660e9cc92a3128a8a03489dc01818facb7bcde5fec3aa0a"
+    },
+    {
+      "path": "hgnc_protein_coding.parquet",
+      "bytes": 501244,
+      "sha256": "4b09a64d0ea39817cb41f648c44891f63be0d69642e295e041b5197c397d311e"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 6925,
+      "sha256": "e99bbf1de59443701c3b2175e6f5fa73c089846a818b99f7542594272011b87a"
+    },
+    {
+      "path": "progressive/00000.npz",
+      "bytes": 63277194,
+      "sha256": "2b7c407b363996b965f0518bf62c39cb3ffea2d4e103ed40408ef62ac60bc0f2"
+    },
+    {
+      "path": "progressive/00001.npz",
+      "bytes": 63521316,
+      "sha256": "3392dc483d6bcd739ed89a05b9a2042fd69d1f2e9e6922194ffeb872f450d80a"
+    },
+    {
+      "path": "progressive/00002.npz",
+      "bytes": 62981193,
+      "sha256": "a99de19308d281c1612f398f053c837c954fb76cfe120fac09e6cae9e42d61ae"
+    },
+    {
+      "path": "progressive/00003.npz",
+      "bytes": 62904132,
+      "sha256": "25593ebfe6eb77522ad51d36790018b69b146c8a58e7329677fc34cefa8f856d"
+    },
+    {
+      "path": "progressive/00004.npz",
+      "bytes": 63099866,
+      "sha256": "68848c5c3143dbc21dfcbc85f106e9d4186e7fefb9c79adb3ed82675e923b300"
+    },
+    {
+      "path": "progressive/00005.npz",
+      "bytes": 63192921,
+      "sha256": "f6d56d891dd5c020f62e2b7ff50c02084eb63efba33fb815450b9a03757c87ac"
+    },
+    {
+      "path": "progressive/00006.npz",
+      "bytes": 63046130,
+      "sha256": "3a206d709c58bfdb105bfd42e127f9ad9a3044ae63e451f083fac29baae24c2c"
+    },
+    {
+      "path": "progressive/00007.npz",
+      "bytes": 63163143,
+      "sha256": "ef3e52484189b44834bfca42c49d462784f12b295e07be9a36d27c753f948cd5"
+    },
+    {
+      "path": "progressive/00008.npz",
+      "bytes": 7342755,
+      "sha256": "db12b07e69cc9b6d2941a7d63320aa7d4f91d513bd0c16063a799fb416e4d5ca"
+    },
+    {
+      "path": "validation_colab.json",
+      "bytes": 746,
+      "sha256": "39e3c6f1444e9841b96b2706755459ce321ceeda387fc316f8a583ef69969aeb"
+    }
+  ],
+  "bundles": [
+    {
+      "path": "part-00000.zip",
+      "bytes": 22108345,
+      "sha256": "35452d90a29afb86e0f5c9aa69cfe01a69d6ca64f4df9fb2a59670b081023915"
+    },
+    {
+      "path": "part-00001.zip",
+      "bytes": 3898649,
+      "sha256": "569e4500e5875ad645a10a38d34882002cfe5eae7ec106500750e6f11aebadd7"
+    },
+    {
+      "path": "part-00002.zip",
+      "bytes": 63277334,
+      "sha256": "59618f6b3899c9c406523df9570ce103e633bb015c1ab5495a6ac216e0234339"
+    },
+    {
+      "path": "part-00003.zip",
+      "bytes": 63521456,
+      "sha256": "253f8f854e0147b77cedb1838fed8c5720ce999be2f9d99ae724e4be8bcb1fd4"
+    },
+    {
+      "path": "part-00004.zip",
+      "bytes": 62981333,
+      "sha256": "2fb9740999079f036ca159f606ac460cce05dba64d45927e68d840d6edaf47c3"
+    },
+    {
+      "path": "part-00005.zip",
+      "bytes": 62904272,
+      "sha256": "b10d88df2c414b018ee5b5d038c2799b738cc51d821e8693812cbb6eba98df36"
+    },
+    {
+      "path": "part-00006.zip",
+      "bytes": 63100006,
+      "sha256": "35e7b755f9da2e7ce1ac914b0fe6640c401c4b490acc4d6795e18c90d9b92b5d"
+    },
+    {
+      "path": "part-00007.zip",
+      "bytes": 63193061,
+      "sha256": "62559b5570a2f68e3d06b90df3f1c39d7f60d77aaa915ab1f04147a76e5df70c"
+    },
+    {
+      "path": "part-00008.zip",
+      "bytes": 63046270,
+      "sha256": "26e8bfeed03c9d98d6ce49136cbcbd7c609eab05a5246406931f9c0573aaef57"
+    },
+    {
+      "path": "part-00009.zip",
+      "bytes": 63163283,
+      "sha256": "47b194b7c8741b3852d83e797e1f9ae49170c9cbef11b5ca113cb61c3ba2264c"
+    },
+    {
+      "path": "part-00010.zip",
+      "bytes": 7343759,
+      "sha256": "1eaffa15955192f5d33b90452d3453605700852cf389137fa1edec59c552eac4"
+    }
+  ],
+  "total_processed_bytes": 538535678
+}

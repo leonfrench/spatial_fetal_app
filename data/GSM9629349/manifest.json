@@ -1,0 +1,263 @@
+{
+  "format": "sparse-doubled-average-ranks-v1",
+  "dataset": "GSM9629349",
+  "created_utc": "2026-10-09T11:41:46.167495+00:00",
+  "n_cells": 265988,
+  "n_genes": 18622,
+  "n_celltypes": 21,
+  "seed": 20261008,
+  "min_cells": 0,
+  "sampling": {
+    "method": "spatial",
+    "levels": [
+      {
+        "grid_width": 16,
+        "added": 1138,
+        "cumulative": 1138
+      },
+      {
+        "grid_width": 8,
+        "added": 3214,
+        "cumulative": 4352
+      },
+      {
+        "grid_width": 4,
+        "added": 12625,
+        "cumulative": 16977
+      },
+      {
+        "grid_width": 2,
+        "added": 49999,
+        "cumulative": 66976
+      },
+      {
+        "grid_width": 1,
+        "added": 199012,
+        "cumulative": 265988
+      }
+    ]
+  },
+  "progressive_batch_size": 32768,
+  "source": {
+    "url": "https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM9629nnn/GSM9629349/suppl/GSM9629349_CS20_E1S7_HESTA.h5ad",
+    "bytes": 6931978684,
+    "sha256": "b36238509faf374f7b9d0907211e35b57413d7ec44001c563a2469edef8aad00",
+    "matrix": "layers/counts"
+  },
+  "hgnc": {
+    "url": "https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt",
+    "sha256": "8bf6f686e640dbc864a346484626953621b0500d900d26cd085a35c2782d725d",
+    "n_protein_coding": 19299
+  },
+  "gene_mapping_counts": {
+    "not_protein_coding_or_unmapped": 33612,
+    "retained": 18633,
+    "ambiguous": 3
+  },
+  "retained_mapping_methods": {
+    "approved_symbol": 18032,
+    "previous_symbol": 601
+  },
+  "ranks": {
+    "direction": "ascending: larger rank means higher expression",
+    "ties": "average",
+    "scale": 2,
+    "zeros": "all unstored genes have rank zero_rank2 / 2; stored ranks are absolute",
+    "universe": "HGNC approved protein-coding genes mapped from source and passing min_cells; absent source genes excluded",
+    "duplicate_genes": "sum counts before ranking",
+    "auroc": "(sum(rank of set) - k*(k+1)/2) / (k*(G-k))"
+  },
+  "coordinates": {
+    "source": "obs.x, obs.y",
+    "units": "source units, not converted to micrometres",
+    "obsm_spatial_equal": true,
+    "bbox": [
+      10800.0,
+      3800.0,
+      52850.0,
+      27350.0
+    ],
+    "grid": 8
+  },
+  "source_var_detection_counts_stale": true,
+  "validation": {
+    "exact_rank_and_pairwise_auc_rows": 64,
+    "all_shards_roundtripped": true,
+    "layouts_each_cover_all_cells_once": true,
+    "median_shard_read_and_verify_seconds": 1.6514140279999765
+  },
+  "software": {
+    "python": "3.13.16",
+    "numpy": "2.1.3",
+    "pandas": "3.0.6",
+    "scipy": "1.16.3",
+    "h5py": "3.14.0"
+  },
+  "files": [
+    {
+      "path": "genes.parquet",
+      "bytes": 841626,
+      "sha256": "73768f1eba890e6ef660e9cc92a3128a8a03489dc01818facb7bcde5fec3aa0a"
+    },
+    {
+      "path": "cells.parquet",
+      "bytes": 22108221,
+      "sha256": "e1725dc14352e1e7f44b43233d7a01235d2186be91188f6cfe4afee509db38f6"
+    },
+    {
+      "path": "progressive/00000.npz",
+      "bytes": 63277194,
+      "sha256": "2b7c407b363996b965f0518bf62c39cb3ffea2d4e103ed40408ef62ac60bc0f2",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        10800.0,
+        3850.0,
+        52850.0,
+        27350.0
+      ],
+      "sampling_order_min": 0,
+      "sampling_order_max": 32767
+    },
+    {
+      "path": "progressive/00001.npz",
+      "bytes": 63521316,
+      "sha256": "3392dc483d6bcd739ed89a05b9a2042fd69d1f2e9e6922194ffeb872f450d80a",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        10850.0,
+        3850.0,
+        52850.0,
+        27350.0
+      ],
+      "sampling_order_min": 32768,
+      "sampling_order_max": 65535
+    },
+    {
+      "path": "progressive/00002.npz",
+      "bytes": 62981193,
+      "sha256": "a99de19308d281c1612f398f053c837c954fb76cfe120fac09e6cae9e42d61ae",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        10800.0,
+        3800.0,
+        52850.0,
+        27350.0
+      ],
+      "sampling_order_min": 65536,
+      "sampling_order_max": 98303
+    },
+    {
+      "path": "progressive/00003.npz",
+      "bytes": 62904132,
+      "sha256": "25593ebfe6eb77522ad51d36790018b69b146c8a58e7329677fc34cefa8f856d",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        10800.0,
+        3850.0,
+        52850.0,
+        27350.0
+      ],
+      "sampling_order_min": 98304,
+      "sampling_order_max": 131071
+    },
+    {
+      "path": "progressive/00004.npz",
+      "bytes": 63099866,
+      "sha256": "68848c5c3143dbc21dfcbc85f106e9d4186e7fefb9c79adb3ed82675e923b300",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        10800.0,
+        3800.0,
+        52850.0,
+        27350.0
+      ],
+      "sampling_order_min": 131072,
+      "sampling_order_max": 163839
+    },
+    {
+      "path": "progressive/00005.npz",
+      "bytes": 63192921,
+      "sha256": "f6d56d891dd5c020f62e2b7ff50c02084eb63efba33fb815450b9a03757c87ac",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        10850.0,
+        3800.0,
+        52850.0,
+        27350.0
+      ],
+      "sampling_order_min": 163840,
+      "sampling_order_max": 196607
+    },
+    {
+      "path": "progressive/00006.npz",
+      "bytes": 63046130,
+      "sha256": "3a206d709c58bfdb105bfd42e127f9ad9a3044ae63e451f083fac29baae24c2c",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        10850.0,
+        3800.0,
+        52850.0,
+        27350.0
+      ],
+      "sampling_order_min": 196608,
+      "sampling_order_max": 229375
+    },
+    {
+      "path": "progressive/00007.npz",
+      "bytes": 63163143,
+      "sha256": "ef3e52484189b44834bfca42c49d462784f12b295e07be9a36d27c753f948cd5",
+      "layout": "progressive",
+      "n_cells": 32768,
+      "bbox": [
+        10800.0,
+        3800.0,
+        52850.0,
+        27350.0
+      ],
+      "sampling_order_min": 229376,
+      "sampling_order_max": 262143
+    },
+    {
+      "path": "progressive/00008.npz",
+      "bytes": 7342755,
+      "sha256": "db12b07e69cc9b6d2941a7d63320aa7d4f91d513bd0c16063a799fb416e4d5ca",
+      "layout": "progressive",
+      "n_cells": 3844,
+      "bbox": [
+        11000.0,
+        3900.0,
+        52850.0,
+        27300.0
+      ],
+      "sampling_order_min": 262144,
+      "sampling_order_max": 265987
+    }
+  ],
+  "progressive": [
+    "progressive/00000.npz",
+    "progressive/00001.npz",
+    "progressive/00002.npz",
+    "progressive/00003.npz",
+    "progressive/00004.npz",
+    "progressive/00005.npz",
+    "progressive/00006.npz",
+    "progressive/00007.npz",
+    "progressive/00008.npz"
+  ],
+  "spatial": [],
+  "unused_data_cleanup": {
+    "completed_utc": "2026-10-09T13:11:06.139119+00:00",
+    "removed_files": [
+      "gene_mapping.parquet",
+      "hgnc_protein_coding.parquet"
+    ],
+    "note": "Historical reports predate cleanup. Active ranks and cell/gene metadata are unchanged."
+  }
+}
