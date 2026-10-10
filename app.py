@@ -30,10 +30,13 @@ h1 {font-size:2rem !important; font-weight:650 !important; letter-spacing:-.04em
 [data-testid="stMetricValue"] {font-size:1.55rem; font-weight:600;}
 [data-testid="stMetricLabel"] {color:#69788a; font-size:.8rem;}
 [data-testid="stSidebar"] .block-container {padding-top:1.5rem;}
+[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {gap:0.4rem;}
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] p {margin-bottom:0;}
 .st-key-cycle_colour button {background:#187D92 !important; color:white !important;
  border:2px solid #126375 !important; min-height:3.4rem; box-shadow:0 2px 6px #187d9230;}
 .st-key-cycle_colour button p {font-size:1.12rem !important; font-weight:700 !important;}
 .st-key-cycle_colour button:hover {background:#126375 !important;}
+.st-key-spatial_chart_panel {gap:0.25rem;}
 </style>''',unsafe_allow_html=True)
 
 
@@ -96,8 +99,10 @@ def reset_scores():
 
 
 with st.sidebar:
-    st.markdown('## Gene-set scoring')
-    species = st.selectbox('Species of input genes',SPECIES,key='input_species',
+    species_label, species_selector = st.columns([1.8, 1.4], gap='small', vertical_alignment='center')
+    species_label.markdown('Input gene source:')
+    species = species_selector.selectbox('Species of input genes',SPECIES,key='input_species',
+        label_visibility='collapsed',
         help='Applies to both target and background genes. Mouse and Rhesus Macaque symbols are mapped to human orthologs; use the source species’ symbol capitalization.')
     st.caption('Separate gene symbols with spaces, commas or new lines.')
     target_text = st.text_area('Target genes',value='SOX2\nPAX6\nNES\nDCX\nTUBB3',height=155,key='target_input',
@@ -156,7 +161,13 @@ with st.sidebar:
         '(https://doi.org/10.1038/s41586-026-10545-0). *Nature*, 654. '
         'doi:10.1038/s41586-026-10545-0.')
 
-st.caption('SPATIAL TRANSCRIPTOMICS  /  HESTA')
+st.markdown(
+    '<div style="color:#000;font-family:inherit;font-size:24px;font-weight:400;line-height:1.4;margin-bottom:12px;">'
+    'Polygenic enrichment tool for the human embryo transcriptome atlas by '
+    '<a href="https://doi.org/10.1038/s41586-026-10545-0" target="_blank" '
+    'rel="noopener noreferrer" style="color:#000;text-decoration:underline;">'
+    'Pan et al.</a></div>',
+    unsafe_allow_html=True)
 sample_label = SLICE_LABELS.get(manifest['dataset'],manifest['dataset'])
 st.markdown(f'**{sample_label}** &nbsp; · &nbsp; The plot updates as each batch finishes.')
 
@@ -197,7 +208,7 @@ def render_progress():
     cols = st.columns([1,1,1,1.25])
     cols[0].metric('OBSERVATIONS SHOWN',f'{len(cells):,}')
     cols[1].metric('SCORED',f'{count:,} / {len(cells):,}')
-    cols[2].metric('TARGET / UNIVERSE',f"{len(job['query'].target):,} / {job['query'].universe_size:,}" if job else f'— / {len(genes):,}')
+    cols[2].metric('GENE TARGET / UNIVERSE',f"{len(job['query'].target):,} / {job['query'].universe_size:,}" if job else f'— / {len(genes):,}')
     cols[3].metric('OBSERVED AUROC RANGE',f'{limits[0]:.3f} – {limits[1]:.3f}' if limits else 'Not scored yet')
     if job:
         if job['error']:
@@ -247,13 +258,13 @@ def render_results():
     if not pending:
         displayed['mode'] = mode
         displayed['type_aurocs'] = type_aurocs
-    tile_chart(displayed['cells'],displayed['scores'],version=displayed['version'],
-               mode=displayed['mode'],type_aurocs=displayed['type_aurocs'],
-               filename=f"{displayed['dataset']}-spatial",rotation=displayed['rotation'])
-    st.caption('Overview blocks show mean scored AUROC, or majority tissue; zoom in for individual bins and exact bin hover. '
-               'Unscored occupied blocks use a neighboring scored-block preview when available; empty blocks stay blank. '
-               'Previews and overview aggregation never change statistics or downloads. '
-               'Drag to pan, scroll to zoom, double-click to reset.')
+    with st.container(key='spatial_chart_panel'):
+        tile_chart(displayed['cells'],displayed['scores'],version=displayed['version'],
+                   mode=displayed['mode'],type_aurocs=displayed['type_aurocs'],
+                   filename=f"{displayed['dataset']}-spatial",rotation=displayed['rotation'])
+        st.caption('Overview blocks show mean scored AUROC, or majority tissue; zoom in for individual bins and exact bin hover. '
+                   'Unscored occupied blocks use a neighboring scored-block preview when available; empty blocks stay blank. '
+                   'Drag to pan, scroll to zoom, double-click to reset.')
     slice_total=len(cells)*len(genes)
     slice_zeros=slice_total-int(genes.n_cells_detected.sum())
     if job:

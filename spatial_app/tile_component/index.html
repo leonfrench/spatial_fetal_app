@@ -67,5 +67,5 @@ window.addEventListener('message',event=>{if(event.source!==parent||event.data.t
  if(mode!==args.mode||JSON.stringify(aucs)!==JSON.stringify(args.type_aurocs)){dirty=true;mode=args.mode;aucs=args.type_aurocs;}
  filename=args.filename;if(changed||dirty)schedule();if(changed)send('streamlit:setComponentValue',{value:{client,version,seq}});
 });
-new ResizeObserver(schedule).observe(area);send('streamlit:componentReady',{apiVersion:1});send('streamlit:setFrameHeight',{height:680});send('streamlit:setComponentValue',{value:{client,version:null,seq:-1}});
+new ResizeObserver(schedule).observe(area);send('streamlit:componentReady',{apiVersion:1});send('streamlit:setFrameHeight',{height:675});send('streamlit:setComponentValue',{value:{client,version:null,seq:-1}});
 </script></body></html>
