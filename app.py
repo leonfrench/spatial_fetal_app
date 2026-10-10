@@ -161,21 +161,28 @@ st.markdown(f'**{sample_label}** &nbsp; · &nbsp; All observations stay visible 
 
 @st.fragment(run_every=0.25 if st.session_state.job and st.session_state.job['running'] else None)
 def render_explorer():
+    render_started = time.perf_counter()
+    timing_context = f"dataset={manifest['dataset']} mode={mode!r}"
     job = st.session_state.job
     if job and job['running'] and job['next_batch'] < len(paths):
         path = paths[job['next_batch']]
+        print(f"[timing] {timing_context} batch={job['next_batch']+1}/{len(paths)} start",flush=True)
         try:
             started = time.perf_counter()
             shard = cached_shard(str(DATA/path),checksums[path])
-            job['load_seconds'] += time.perf_counter()-started
+            load_seconds = time.perf_counter()-started
+            job['load_seconds'] += load_seconds
             started = time.perf_counter()
             q = job['query']
             batch_scores = auroc_vectorized(shard,q.target,len(genes),q.background)
             if not np.isfinite(batch_scores).all():
                 raise ValueError('Scoring produced undefined values')
             st.session_state.scores[shard['cell_index']] = batch_scores
-            job['compute_seconds'] += time.perf_counter()-started
+            compute_seconds = time.perf_counter()-started
+            job['compute_seconds'] += compute_seconds
             job['next_batch'] += 1
+            print(f"[timing] {timing_context} batch={job['next_batch']}/{len(paths)} "
+                  f"load_s={load_seconds:.3f} scoring_s={compute_seconds:.3f}",flush=True)
             if job['next_batch']==len(paths):
                 job['running'] = False
                 st.rerun()  # Stop the fragment timer and render the completed result.
@@ -206,12 +213,18 @@ def render_explorer():
         st.progress(count/len(cells),text=f"{label} · {job['next_batch']} of {len(paths)} batches · vectorized scoring {job['compute_seconds']:.2f}s")
     else:
         st.info('All bins are shown. Enter a valid target gene set to calculate AUROC automatically, or switch to tissue colours.')
+    started = time.perf_counter()
+    print(f"[timing] {timing_context} scored={count}/{len(cells)} enrichment_start",flush=True)
     summary=celltype_enrichment(cells.celltype.astype(str),scores)
+    print(f"[timing] {timing_context} enrichment_s={time.perf_counter()-started:.3f}",flush=True)
     type_aurocs=summary.set_index('Cell type')['AUROC'].to_dict()
     spatial_preview=manifest.get('sampling',{}).get('method')=='spatial'
+    started = time.perf_counter()
+    print(f"[timing] {timing_context} plot_build_start",flush=True)
     fig=spatial_figure(cells,scores,mode,flip_y,version,type_aurocs=type_aurocs,preview=spatial_preview,
                        rotate_ccw=manifest['dataset']=='GSM9629349',
                        rotation_degrees=70 if manifest['dataset']=='GSM9629365' else 0)
+    print(f"[timing] {timing_context} plot_build_s={time.perf_counter()-started:.3f}",flush=True)
     tile_chart(fig,filename=f"{manifest['dataset']}-spatial")
     if mode=='Gene-set AUROC':
         if spatial_preview:
@@ -249,6 +262,7 @@ def render_explorer():
         export['auroc']=scores
         st.download_button('Download bin scores',export.to_csv(index=False).encode(),
                            file_name=f"{manifest['dataset']}-auroc.csv",mime='text/csv',key='download_scores')
+    print(f"[timing] {timing_context} server_update_s={time.perf_counter()-render_started:.3f}",flush=True)
 
 
 
