@@ -15,7 +15,7 @@ from spatial_app.enrichment import celltype_enrichment
 from spatial_app.orthologs import SPECIES, map_input
 
 ROOT = Path(__file__).resolve().parent
-DEFAULT_DATA = Path(os.environ.get('FETAL_APP_DATA',str(ROOT/'data/GSM9629296'))).resolve()
+DEFAULT_DATA = Path(os.environ.get('FETAL_APP_DATA',str(ROOT/'data/GSM9629349'))).resolve()
 SLICE_LABELS = {
     'GSM9629296':'CS12–13 · Embryo 2 · Section 3',
     'GSM9629349':'CS20 · Embryo 1 · Section 7',
@@ -192,15 +192,15 @@ def render_explorer():
     if job:
         if job['error']:
             st.error(f"Scoring stopped: {job['error']}")
+        q=job['query']
+        active=', '.join(q.target_symbols[:12]) + (' …' if len(q.target_symbols)>12 else '')
+        st.caption(f"Active targets: {active}. " + ('Ranks recomputed within your background universe.' if q.background is not None else 'Universe: all retained protein-coding genes.'))
         label = ('Complete' if count==len(cells) else ('Scoring' if job['running'] else 'Paused'))
         st.progress(count/len(cells),text=f"{label} · {job['next_batch']} of {len(paths)} batches · vectorized scoring {job['compute_seconds']:.2f}s")
         if count < len(cells) and not job['error']:
             if st.button('Pause scoring' if job['running'] else 'Resume scoring',key='pause_resume'):
                 job['running'] = not job['running']
                 st.rerun()
-        q=job['query']
-        active=', '.join(q.target_symbols[:12]) + (' …' if len(q.target_symbols)>12 else '')
-        st.caption(f"Active targets: {active}. " + ('Ranks recomputed within your background universe.' if q.background is not None else 'Universe: all retained protein-coding genes.'))
         if q.unknown_target or q.unknown_background or q.outside_background:
             with st.expander(f'Gene matching · {len(q.unknown_target)+len(q.outside_background)} target symbols excluded',expanded=False):
                 if q.unknown_target: st.warning('Targets not in dataset: '+', '.join(q.unknown_target))
