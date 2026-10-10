@@ -247,16 +247,6 @@ def render_results():
     if not pending:
         displayed['mode'] = mode
         displayed['type_aurocs'] = type_aurocs
-    plot_status = ('Showing the completed results for the current query.' if count == len(cells)
-                   else f'Showing {count:,} scored bins; the plot updates after each batch.')
-    if pending:
-        if displayed['signature'] is None:
-            plot_status = 'Calculating the first batch. The existing plot stays visible until it is ready.'
-        else:
-            old_slice = SLICE_LABELS.get(displayed['dataset'],displayed['dataset'])
-            status = 'Calculating updated results' if job and job['running'] else 'The current query has not completed'
-            plot_status = f'{status}. Showing the previous plot for {old_slice}; it will update when the next batch is ready.'
-    st.caption(plot_status)
     tile_chart(displayed['cells'],displayed['scores'],version=displayed['version'],
                mode=displayed['mode'],type_aurocs=displayed['type_aurocs'],
                filename=f"{displayed['dataset']}-spatial",rotation=displayed['rotation'])
