@@ -169,7 +169,8 @@ st.markdown(
     'Pan et al.</a></div>',
     unsafe_allow_html=True)
 sample_label = SLICE_LABELS.get(manifest['dataset'],manifest['dataset'])
-st.markdown(f'**{sample_label}** &nbsp; · &nbsp; The plot updates as each batch finishes.')
+main_sample_label = sample_label.replace('CS', 'Carnegie stage ', 1) if sample_label.startswith('CS') else sample_label
+st.markdown(f'**{main_sample_label}**')
 
 
 def render_progress():
