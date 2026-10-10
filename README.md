@@ -12,11 +12,11 @@ The initial source is GEO **GSM9629296 / CS12-13_E2S3_HESTA**.
 
 Open http://localhost:8501. The app defaults to CS20 at `data/GSM9629349/`
 (265,988 bins) and does not use Colab. Scoring starts automatically.
-The last completed plot remains visible while a new query or slice is scored.
-The progress bar reflects the pending calculation, and a caption identifies
-when the plot still shows previous results. Only a completed query replaces the
-plot. Invalid inputs or scoring failures leave the previous plot intact. On the
-first load, a neutral tissue footprint is shown until scoring completes.
+The plot updates after each completed batch. Scoring and plotting use stable containers within one
+fragment; the browser prepares each raster frame offscreen before replacing the
+visible canvas. The existing plot stays visible during calculation. A new query
+or slice starts replacing it as soon as its first batch is ready. Invalid inputs
+leave the previous plot intact. Enrichment is still calculated only at completion.
 The slice selector also offers CS12–13 and CS23. The progressive files
 use spatial refinement order, in batches of 32,768 bins. Occupied grid blocks
 are sampled at widths 16, 8, 4, 2, and 1, retaining earlier representatives and
@@ -24,7 +24,7 @@ adding the bin nearest each newly unrepresented block's center. Additions
 within a level are shuffled with a fixed seed so partial levels cover the tissue.
 The first full batch includes several levels; it is not a 16-bin-resolution image.
 The browser receives compact source-grid positions and integer tissue codes,
-then indexed float64 score updates when a query completes. Geometry is reused after acknowledgment;
+then indexed float64 score updates as batches complete. Geometry is reused after acknowledgment;
 a replaced iframe receives a fresh snapshot. At the initial zoom, a canvas
 raster aggregates source bins into blocks sized for the display resolution.
 Numeric blocks show the mean of scored values; tissue blocks show the majority

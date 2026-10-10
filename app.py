@@ -158,11 +158,10 @@ with st.sidebar:
 
 st.caption('SPATIAL TRANSCRIPTOMICS  /  HESTA')
 sample_label = SLICE_LABELS.get(manifest['dataset'],manifest['dataset'])
-st.markdown(f'**{sample_label}** &nbsp; · &nbsp; The plot updates when all batches finish.')
+st.markdown(f'**{sample_label}** &nbsp; · &nbsp; The plot updates as each batch finishes.')
 
 
-@st.fragment(run_every=0.25 if st.session_state.job and st.session_state.job['running'] else None)
-def render_explorer():
+def render_progress():
     render_started = time.perf_counter()
     timing_context = f"dataset={manifest['dataset']} mode={mode!r}"
     job = st.session_state.job
@@ -219,8 +218,7 @@ def render_explorer():
 
 
 def render_results():
-    # The custom component lives outside the scoring fragment. Timer updates
-    # only change progress; a full rerun publishes the completed snapshot.
+    # Publish only finished batches in a stable chart container.
     render_started = time.perf_counter()
     timing_context = f"dataset={manifest['dataset']} mode={mode!r}"
     job = st.session_state.job
@@ -235,27 +233,29 @@ def render_results():
         print(f"[timing] {timing_context} enrichment_s={time.perf_counter()-started:.3f}",flush=True)
     type_aurocs = summary.set_index('Cell type')['AUROC'].to_dict() if summary is not None else {}
     displayed = st.session_state.get('displayed_plot')
-    ready = summary is not None and count == len(cells)
-    if displayed is None or (ready and displayed['signature'] != input_signature):
+    ready = count > 0
+    if displayed is None or (ready and (displayed['signature'] != input_signature or displayed.get('count') != count)):
         displayed = dict(
             cells=cells[['x','y','celltype']].copy(),
             scores=scores.copy() if ready else np.full(len(cells),np.nan),
             version=version, dataset=manifest['dataset'],
-            signature=input_signature if ready else None,
+            signature=input_signature if ready else None, count=count if ready else 0,
             type_aurocs=type_aurocs if ready else {}, mode=mode,
             rotation=90 if manifest['dataset']=='GSM9629349' else (70 if manifest['dataset']=='GSM9629365' else 0))
         st.session_state.displayed_plot = displayed
     pending = displayed['signature'] != input_signature
     if not pending:
         displayed['mode'] = mode
-    plot_status = 'Showing the completed results for the current query.'
+        displayed['type_aurocs'] = type_aurocs
+    plot_status = ('Showing the completed results for the current query.' if count == len(cells)
+                   else f'Showing {count:,} scored bins; the plot updates after each batch.')
     if pending:
         if displayed['signature'] is None:
-            plot_status = 'Calculating results. The plot will update when all batches finish.'
+            plot_status = 'Calculating the first batch. The existing plot stays visible until it is ready.'
         else:
             old_slice = SLICE_LABELS.get(displayed['dataset'],displayed['dataset'])
             status = 'Calculating updated results' if job and job['running'] else 'The current query has not completed'
-            plot_status = f'{status}. Showing the previous completed plot for {old_slice}; it will be replaced when the new results are ready.'
+            plot_status = f'{status}. Showing the previous plot for {old_slice}; it will update when the next batch is ready.'
     st.caption(plot_status)
     tile_chart(displayed['cells'],displayed['scores'],version=displayed['version'],
                mode=displayed['mode'],type_aurocs=displayed['type_aurocs'],
@@ -296,5 +296,14 @@ def render_results():
 
 
 
+@st.fragment(run_every=0.25 if st.session_state.job and st.session_state.job['running'] else None)
+def render_explorer():
+    # One timer prevents competing fragments from starving chart updates.
+    # Separate containers keep the iframe position stable when controls change.
+    with st.container():
+        render_progress()
+    with st.container():
+        render_results()
+
+
 render_explorer()
-render_results()

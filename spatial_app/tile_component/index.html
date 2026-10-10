@@ -32,12 +32,19 @@ function legend(){const el=document.getElementById('legend');el.replaceChildren(
   }
   el.append(bar);
  }}
-function draw(){if(!g)return;const started=performance.now(),dpr=window.devicePixelRatio||1,w=area.clientWidth,h=area.clientHeight;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
+function draw(){if(!g)return;const started=performance.now(),dpr=window.devicePixelRatio||1,w=area.clientWidth,h=area.clientHeight;
  const factor=SpatialRaster.factorForScale(scale,dpr);
  if(dirty||!raster||raster.factor!==factor){raster=SpatialRaster.aggregate(g,scores,factor,mode,aucs);limits();legend();buffer=document.createElement('canvas');buffer.width=raster.w;buffer.height=raster.h;const bctx=buffer.getContext('2d'),img=bctx.createImageData(raster.w,raster.h),colors=g.colors.map(rgb);
  for(let b=0;b<raster.values.length;b++){if(!raster.occupied[b])continue;const c=mode==='Cell type'?colors[raster.categories[b]]:color(raster.values[b]);img.data.set([...c,255],b*4);}bctx.putImageData(img,0,0);dirty=false;}
- ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='white';ctx.fillRect(0,0,w,h);ctx.translate(panX,panY);ctx.scale(scale,-scale);ctx.rotate(g.rotation*Math.PI/180);ctx.imageSmoothingEnabled=false;
- ctx.drawImage(buffer,-g.width/2,-g.height/2,raster.w*factor,raster.h*factor);
+ // Prepare the whole next frame offscreen, then present it in one operation.
+ // Never clear or resize the visible canvas while aggregation is in progress.
+ const next=document.createElement('canvas');next.width=Math.round(w*dpr);next.height=Math.round(h*dpr);
+ const paint=next.getContext('2d');paint.setTransform(dpr,0,0,dpr,0,0);paint.fillStyle='white';paint.fillRect(0,0,w,h);
+ paint.translate(panX,panY);paint.scale(scale,-scale);paint.rotate(g.rotation*Math.PI/180);paint.imageSmoothingEnabled=false;
+ paint.drawImage(buffer,-g.width/2,-g.height/2,raster.w*factor,raster.h*factor);
+ if(canvas.width!==next.width)canvas.width=next.width;
+ if(canvas.height!==next.height)canvas.height=next.height;
+ ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(next,0,0);
  document.getElementById('status').textContent=factor===1?'Individual bins':'Overview: '+factor+'×'+factor+' source-bin blocks · '+(mode==='Cell type'?'majority tissue':'mean scored AUROC');
  console.debug('[timing] browser_raster_ms='+(performance.now()-started).toFixed(1)+' factor='+factor);
 }
