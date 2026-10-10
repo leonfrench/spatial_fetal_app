@@ -1,29 +1,52 @@
 <!doctype html>
-<html><head><meta charset="UTF-8"><style>html,body{margin:0;background:white;}#plot{width:100%;height:680px;}</style>
-<script src="plotly.min.js"></script></head><body><div id="plot"></div>
-<script>
-const plot=document.getElementById('plot');
+<html><head><meta charset="UTF-8"><style>
+html,body{margin:0;background:white;font:12px Arial;color:#43536A}#wrap{display:flex;height:640px}#area{position:relative;flex:1;min-width:100px;overflow:hidden}canvas{width:100%;height:100%;touch-action:none;cursor:grab}#legend{width:230px;padding:12px 8px;overflow:auto;flex-shrink:0}.row{margin:7px 0}.swatch{display:inline-block;width:12px;height:12px;margin-right:7px}#tip{position:absolute;pointer-events:none;display:none;background:white;border:1px solid #aaa;padding:8px;max-width:260px;white-space:pre-line}#tools{height:35px;display:flex;align-items:center;gap:12px}button{background:white;border:1px solid #ccc;border-radius:4px;padding:5px 10px;color:#43536A}#status{font-size:11px}@media(max-width:600px){#legend{width:150px}}
+</style></head><body>
+<div id="tools"><button id="reset">Reset view</button><button id="save">Save PNG</button><span id="status"></span></div>
+<div id="wrap"><div id="area"><canvas id="plot"></canvas><div id="tip"></div></div><div id="legend"></div></div>
+<script src="raster.js"></script><script>
+const canvas=document.getElementById('plot'),ctx=canvas.getContext('2d'),area=document.getElementById('area'),tip=document.getElementById('tip');
 const send=(type,extra={})=>parent.postMessage({isStreamlitMessage:true,type,...extra},'*');
-let revision=null, chain=Promise.resolve();
-window.addEventListener('message',event=>{
- if(event.source!==parent || event.data.type!=='streamlit:render')return;
- const args=event.data.args;
- chain=chain.then(async()=>{
-  const fig=JSON.parse(args.figure);
-  // Preserve the actual current viewport, including user pan/zoom, when only
-  // the colours or completed scores change. A dataset/orientation change resets.
-  if(revision===fig.layout.uirevision && plot._fullLayout){
-   fig.layout.xaxis.range=plot._fullLayout.xaxis.range.slice();
-   fig.layout.yaxis.range=plot._fullLayout.yaxis.range.slice();
-   fig.layout.xaxis.autorange=false; fig.layout.yaxis.autorange=false;
-  }
-  revision=fig.layout.uirevision;
-  await Plotly.react(plot,fig.data,fig.layout,{responsive:true,scrollZoom:true,displaylogo:false,
-    modeBarButtonsToRemove:['select2d','lasso2d'],toImageButtonOptions:{filename:args.filename,scale:2}});
-  send('streamlit:setFrameHeight',{height:680});
- }).catch(error=>{plot.textContent='Unable to render spatial tiles: '+error.message;});
+const client=String(Date.now())+Math.random();
+let g=null,scores=null,version=null,seq=-1,mode='Gene-set AUROC',aucs={},filename='',scale=1,panX=0,panY=0,raster=null,buffer=null,dirty=true,frame=null,low=0,high=1;
+function decode(s,Type){const bytes=Uint8Array.from(atob(s),c=>c.charCodeAt(0));return new Type(bytes.buffer);}
+function bounds(){const a=g.rotation*Math.PI/180;return [Math.abs(Math.cos(a))*g.width+Math.abs(Math.sin(a))*g.height,Math.abs(Math.sin(a))*g.width+Math.abs(Math.cos(a))*g.height];}
+function reset(){if(!g)return;const [w,h]=bounds();scale=Math.min(area.clientWidth/w,area.clientHeight/h)*.94;panX=area.clientWidth/2;panY=area.clientHeight/2;schedule();}
+function schedule(){if(!frame)frame=requestAnimationFrame(()=>{frame=null;draw();});}
+function rgb(hex){return [1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));}
+const stops=['#32265C','#315B91','#23958B','#7ECF8D','#F3DD65'].map(rgb);
+function color(v){if(!Number.isFinite(v))return [212,220,228];const t=Math.max(0,Math.min(1,(v-low)/(high-low||1)))*4,i=Math.min(3,Math.floor(t)),f=t-i;return stops[i].map((x,j)=>Math.round(x+(stops[i+1][j]-x)*f));}
+function limits(){low=Infinity;high=-Infinity;const values=mode==='Tissue AUROC'?Object.values(aucs):scores;for(const v of values)if(Number.isFinite(v)){low=Math.min(low,v);high=Math.max(high,v);}if(!Number.isFinite(low)){low=0;high=1;}if(low===high){low=Math.max(0,low-.005);high=Math.min(1,high+.005);}}
+function legend(){const el=document.getElementById('legend');el.replaceChildren();const title=document.createElement('strong');title.textContent=mode==='Cell type'?'Tissue · AUROC':mode;el.append(title);
+ if(mode==='Cell type'){g.labels.forEach((name,i)=>{const row=document.createElement('div');row.className='row';const sw=document.createElement('span');sw.className='swatch';sw.style.background=g.colors[i];row.append(sw,document.createTextNode(name+' ('+(Number.isFinite(aucs[name])?aucs[name].toFixed(2):'—')+')'));el.append(row);});}
+ else{const bar=document.createElement('div');bar.style.cssText='margin:14px 0;width:20px;height:260px;background:linear-gradient(to top,#32265C,#315B91,#23958B,#7ECF8D,#F3DD65)';const range=document.createElement('div');range.textContent=low.toFixed(4)+' – '+high.toFixed(4);el.append(bar,range);}}
+function draw(){if(!g)return;const started=performance.now(),dpr=window.devicePixelRatio||1,w=area.clientWidth,h=area.clientHeight;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
+ const factor=SpatialRaster.factorForScale(scale,dpr);
+ if(dirty||!raster||raster.factor!==factor){raster=SpatialRaster.aggregate(g,scores,factor,mode,aucs);limits();legend();buffer=document.createElement('canvas');buffer.width=raster.w;buffer.height=raster.h;const bctx=buffer.getContext('2d'),img=bctx.createImageData(raster.w,raster.h),colors=g.colors.map(rgb);
+ for(let b=0;b<raster.values.length;b++){if(!raster.occupied[b])continue;const c=mode==='Cell type'?colors[raster.categories[b]]:color(raster.values[b]);img.data.set([...c,255],b*4);}bctx.putImageData(img,0,0);dirty=false;}
+ ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='white';ctx.fillRect(0,0,w,h);ctx.translate(panX,panY);ctx.scale(scale,-scale);ctx.rotate(g.rotation*Math.PI/180);ctx.imageSmoothingEnabled=false;
+ ctx.drawImage(buffer,-g.width/2,-g.height/2,raster.w*factor,raster.h*factor);
+ document.getElementById('status').textContent=factor===1?'Individual bins':'Overview: '+factor+'×'+factor+' source-bin blocks · '+(mode==='Cell type'?'majority tissue':'mean scored AUROC');
+ console.debug('[timing] browser_raster_ms='+(performance.now()-started).toFixed(1)+' factor='+factor);
+}
+function sourcePoint(e){const r=canvas.getBoundingClientRect(),x=(e.clientX-r.left-panX)/scale,y=-(e.clientY-r.top-panY)/scale,a=g.rotation*Math.PI/180;return [x*Math.cos(a)+y*Math.sin(a)+g.width/2,-x*Math.sin(a)+y*Math.cos(a)+g.height/2];}
+let drag=null;
+canvas.addEventListener('pointerdown',e=>{drag=[e.clientX,e.clientY,panX,panY];canvas.setPointerCapture(e.pointerId);tip.style.display='none';});
+canvas.addEventListener('pointerup',()=>drag=null);canvas.addEventListener('pointercancel',()=>drag=null);
+canvas.addEventListener('pointermove',e=>{if(!g||!raster)return;if(drag){panX=drag[2]+e.clientX-drag[0];panY=drag[3]+e.clientY-drag[1];schedule();return;}const [x,y]=sourcePoint(e),ix=Math.floor(x),iy=Math.floor(y);tip.style.display='none';if(ix<0||iy<0||ix>=g.width||iy>=g.height)return;const b=Math.floor(iy/raster.factor)*raster.w+Math.floor(ix/raster.factor);if(!raster.occupied[b])return;
+ let text;if(raster.factor===1){const id=g.lookup[iy*g.width+ix];if(id<0)return;text=g.labels[g.categories[id]]+'\nBin '+id+' · x='+ (g.x0+ix*g.dx)+' y='+(g.y0+iy*g.dy);if(mode!=='Cell type')text+='\n'+(raster.preview[b]?'Preview from neighboring scored bins':mode)+': '+(Number.isFinite(raster.values[b])?raster.values[b].toFixed(4):'Not scored');}
+ else{text='Overview block · '+raster.occupied[b]+' bins\n'+(mode==='Cell type'?'Majority tissue: '+g.labels[raster.categories[b]]:(raster.preview[b]?'Preview from neighboring scored blocks':'Mean of '+raster.measured[b]+' scored bins')+': '+(Number.isFinite(raster.values[b])?raster.values[b].toFixed(4):'Not scored'))+'\nZoom in for individual bins';}
+ tip.textContent=text;tip.style.display='block';const r=area.getBoundingClientRect();tip.style.left=Math.max(0,Math.min(e.clientX-r.left+12,area.clientWidth-270))+'px';tip.style.top=Math.max(0,Math.min(e.clientY-r.top+12,area.clientHeight-110))+'px';});
+canvas.addEventListener('pointerleave',()=>tip.style.display='none');
+canvas.addEventListener('wheel',e=>{e.preventDefault();if(!g)return;const r=canvas.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,newScale=Math.max(.01,Math.min(100,scale*Math.exp(-e.deltaY*.002))),ratio=newScale/scale;panX=x+(panX-x)*ratio;panY=y+(panY-y)*ratio;scale=newScale;tip.style.display='none';schedule();},{passive:false});
+canvas.addEventListener('dblclick',reset);document.getElementById('reset').onclick=reset;
+document.getElementById('save').onclick=()=>{const a=document.createElement('a');a.download=filename+'.png';a.href=canvas.toDataURL('image/png');a.click();};
+window.addEventListener('message',event=>{if(event.source!==parent||event.data.type!=='streamlit:render')return;const args=event.data.args,p=args.packet;if(!p)return;
+ if(args.geometry && version!==p.version){g={...args.geometry};g.positions=decode(g.positions,Uint32Array);g.categories=decode(g.categories,Uint16Array);g.lookup=new Int32Array(g.width*g.height);g.lookup.fill(-1);g.positions.forEach((v,i)=>g.lookup[v]=i);scores=new Float64Array(g.positions.length);scores.fill(NaN);version=p.version;seq=-1;dirty=true;reset();}
+ if(!g||version!==p.version){send('streamlit:setComponentValue',{value:{client,version:null,seq:-1}});return;}
+ let changed=false;if(seq!==p.seq){if(p.reset)scores.fill(NaN);const ids=decode(p.indices,Uint32Array),values=decode(p.values,Float64Array);ids.forEach((id,i)=>scores[id]=values[i]);seq=p.seq;dirty=true;changed=true;}
+ if(mode!==args.mode||JSON.stringify(aucs)!==JSON.stringify(args.type_aurocs)){dirty=true;mode=args.mode;aucs=args.type_aurocs;}
+ filename=args.filename;schedule();if(changed)send('streamlit:setComponentValue',{value:{client,version,seq}});
 });
-new ResizeObserver(()=>{if(plot._fullLayout)Plotly.Plots.resize(plot);}).observe(document.body);
-send('streamlit:componentReady',{apiVersion:1});
-send('streamlit:setFrameHeight',{height:680});
+new ResizeObserver(schedule).observe(area);send('streamlit:componentReady',{apiVersion:1});send('streamlit:setFrameHeight',{height:680});send('streamlit:setComponentValue',{value:{client,version:null,seq:-1}});
 </script></body></html>

@@ -1,6 +1,12 @@
 from pathlib import Path
 import numpy as np
+import pytest
 from streamlit.testing.v1 import AppTest
+
+
+@pytest.fixture(autouse=True)
+def small_default(monkeypatch):
+    monkeypatch.setenv('FETAL_APP_DATA',str(Path(__file__).resolve().parents[1]/'data/GSM9629296'))
 
 
 def test_cs23_slice_loads_and_scores_first_spatial_batch():
@@ -11,7 +17,8 @@ def test_cs23_slice_loads_and_scores_first_spatial_batch():
     assert len(app.session_state['scores'])==825115
     assert np.isfinite(app.session_state['scores']).sum()==32768
     assert app.session_state['job']['query'].universe_size==18646
-    assert len(app.dataframe[0].value)==22
+    assert not app.dataframe
+    assert app.session_state['enrichment_summary'] is None
 
 
 def test_slice_switch_restarts_scoring_and_preserves_inputs():
@@ -25,7 +32,7 @@ def test_slice_switch_restarts_scoring_and_preserves_inputs():
     assert app.session_state['job']['next_batch']==1
     assert app.session_state['job']['query'].universe_size==18622
     assert app.text_area(key='target_input').value=='SOX2 PAX6'
-    assert len(app.dataframe[0].value)==21
+    assert not app.dataframe
     app.button(key='cycle_colour').click().run()
     assert app.session_state['colour_mode']=='Cell type'
     app.button(key='cycle_colour').click().run()
@@ -41,9 +48,7 @@ def test_progressive_app_and_background_reset():
     app=AppTest.from_file(str(Path(__file__).resolve().parents[1]/'app.py'),default_timeout=30).run()
     assert not app.exception
     assert len(app.session_state['scores'])==13257
-    table=app.dataframe[0].value
-    assert len(table)==19
-    assert list(table.columns)==['Cell type','Scored bins','AUROC','p-value','Corrected p-value (BH)']
+    assert not app.dataframe
     assert not any(e.label=='Results & scoring details' for e in app.expander)
     assert not any(b.label=='Run AUROC' for b in app.button)
     assert np.isfinite(app.session_state['scores']).sum()==8192
@@ -51,6 +56,9 @@ def test_progressive_app_and_background_reset():
     assert not app.exception
     assert np.isfinite(app.session_state['scores']).all()
     assert not app.session_state['job']['running']
+    table=app.dataframe[0].value
+    assert len(table)==19
+    assert list(table.columns)==['Cell type','Scored bins','AUROC','p-value','Corrected p-value (BH)']
     # A new background discards ALL old scores and starts the new universe.
     app.text_area(key='background_input').set_value('SOX2 PAX6 ACTB GAPDH').run()
     assert not app.exception
@@ -83,3 +91,28 @@ def test_progressive_app_and_background_reset():
     assert not app.exception
     assert app.session_state['job'] is None
     assert np.isnan(app.session_state['scores']).all()
+
+
+def test_enrichment_only_once_per_completed_query(monkeypatch):
+    import spatial_app.enrichment as enrichment
+    original=enrichment.celltype_enrichment
+    calls=[]
+    def counted(labels,scores):
+        assert np.isfinite(scores).all()
+        calls.append(1)
+        return original(labels,scores)
+    monkeypatch.setattr(enrichment,'celltype_enrichment',counted)
+    app=AppTest.from_file(str(Path(__file__).resolve().parents[1]/'app.py'),default_timeout=30).run()
+    assert not calls
+    app.run()
+    assert not app.exception
+    assert len(calls)==1
+    app.button(key='cycle_colour').click().run()
+    app.run()
+    assert len(calls)==1
+    app.text_area(key='target_input').set_value('PAX6 DCX').run()
+    assert app.session_state['enrichment_summary'] is None
+    assert len(calls)==1
+    app.run()
+    assert not app.exception
+    assert len(calls)==2

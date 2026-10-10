@@ -9,7 +9,7 @@ import streamlit as st
 
 from scripts.rank_io import load_shard
 from spatial_app.scoring import resolve_query, auroc_vectorized
-from spatial_app.view import spatial_figure, score_limits
+from spatial_app.view import score_limits
 from spatial_app.chart import tile_chart
 from spatial_app.enrichment import celltype_enrichment
 from spatial_app.orthologs import SPECIES, map_input
@@ -85,12 +85,14 @@ if st.session_state.get('dataset_version') != version:
     st.session_state.scores = np.full(len(cells),np.nan)
     st.session_state.job = None
     st.session_state.query_error = None
+    st.session_state.enrichment_summary = None
 
 
 def reset_scores():
     st.session_state.scores = np.full(len(cells),np.nan)
     st.session_state.job = None
     st.session_state.query_error = None
+    st.session_state.enrichment_summary = None
 
 
 with st.sidebar:
@@ -213,28 +215,21 @@ def render_explorer():
         st.progress(count/len(cells),text=f"{label} · {job['next_batch']} of {len(paths)} batches · vectorized scoring {job['compute_seconds']:.2f}s")
     else:
         st.info('All bins are shown. Enter a valid target gene set to calculate AUROC automatically, or switch to tissue colours.')
-    started = time.perf_counter()
-    print(f"[timing] {timing_context} scored={count}/{len(cells)} enrichment_start",flush=True)
-    summary=celltype_enrichment(cells.celltype.astype(str),scores)
-    print(f"[timing] {timing_context} enrichment_s={time.perf_counter()-started:.3f}",flush=True)
-    type_aurocs=summary.set_index('Cell type')['AUROC'].to_dict()
-    spatial_preview=manifest.get('sampling',{}).get('method')=='spatial'
-    started = time.perf_counter()
-    print(f"[timing] {timing_context} plot_build_start",flush=True)
-    fig=spatial_figure(cells,scores,mode,flip_y,version,type_aurocs=type_aurocs,preview=spatial_preview,
-                       rotate_ccw=manifest['dataset']=='GSM9629349',
-                       rotation_degrees=70 if manifest['dataset']=='GSM9629365' else 0)
-    print(f"[timing] {timing_context} plot_build_s={time.perf_counter()-started:.3f}",flush=True)
-    tile_chart(fig,filename=f"{manifest['dataset']}-spatial")
-    if mode=='Gene-set AUROC':
-        if spatial_preview:
-            st.caption('Unscored bins temporarily show the nearest scored bin’s colour; the preview gains detail as batches finish. Hover identifies preview values. Statistics and downloads use actual scores only. Colour limits follow scored AUROCs. Drag to pan, scroll to zoom, double-click to reset.')
-        else:
-            st.caption('Grey = not yet scored. Colour limits update to the minimum and maximum scored AUROC. 0.5 indicates equal target/background expression ordering; higher values favour the targets. Drag to pan, scroll to zoom, double-click to reset.')
-    elif mode=='Tissue AUROC':
-        st.caption('Each bin shows its tissue’s enrichment AUROC from the completed table. The colour scale spans the tissue AUROC minimum and maximum, independently of bin-level scores.')
-    else:
-        st.caption('Source tissue annotations. Each tile fills one spatial bin. Drag to pan, scroll to zoom.')
+    summary = st.session_state.get('enrichment_summary')
+    if count == len(cells) and summary is None:
+        started = time.perf_counter()
+        print(f"[timing] {timing_context} enrichment_start",flush=True)
+        summary = celltype_enrichment(cells.celltype.astype(str),scores)
+        st.session_state.enrichment_summary = summary
+        print(f"[timing] {timing_context} enrichment_s={time.perf_counter()-started:.3f}",flush=True)
+    type_aurocs = summary.set_index('Cell type')['AUROC'].to_dict() if summary is not None else {}
+    tile_chart(cells,scores,version=version,mode=mode,type_aurocs=type_aurocs,
+               filename=f"{manifest['dataset']}-spatial",
+               rotation=90 if manifest['dataset']=='GSM9629349' else (70 if manifest['dataset']=='GSM9629365' else 0))
+    st.caption('Overview blocks show mean scored AUROC, or majority tissue; zoom in for individual bins and exact bin hover. '
+               'Unscored occupied blocks use a neighboring scored-block preview when available; empty blocks stay blank. '
+               'Previews and overview aggregation never change statistics or downloads. '
+               'Drag to pan, scroll to zoom, double-click to reset.')
     slice_total=len(cells)*len(genes)
     slice_zeros=slice_total-int(genes.n_cells_detected.sum())
     if job:
@@ -246,16 +241,17 @@ def render_explorer():
         st.caption(f'For expression sparsity, {slice_zeros/slice_total:.2%} of entries across all bins and retained genes in the full slice are zero (not detected), independent of the background input.')
     st.subheader('Tissue enrichment')
     st.caption('Ranks bins by their gene-set AUROC, then compares each tissue with all other tissues. AUROC > 0.5 = higher-ranked; < 0.5 = lower-ranked; 0.5 = no ranking preference.')
-    if count < len(cells):
-        st.caption(f'Provisional results from {count:,} scored bins; the table updates as batches finish.')
-    st.dataframe(summary,width='stretch',hide_index=True,height=(len(summary)+1)*35+3,
-        column_config={
-            'Cell type':st.column_config.TextColumn('Tissue'),
-            'AUROC':st.column_config.NumberColumn(format='%.4f',help='Probability that a bin of this tissue scores higher than a bin of another tissue, with half credit for ties.'),
-            'p-value':st.column_config.NumberColumn(format='%.3e',help='Two-sided Mann–Whitney U test, with tie and continuity correction.'),
-            'Corrected p-value (BH)':st.column_config.NumberColumn(format='%.3e',help='Benjamini–Hochberg correction across all annotated tissues in this query.')})
-    st.caption('Two-sided Mann–Whitney p-values; Benjamini–Hochberg correction across tissues for this query. Values that underflow to zero are reported at the smallest positive float (≈4.94 × 10⁻³²⁴). Bin-level tests assume independence; spatial correlation can make these p-values optimistic.')
-    if count and not (job and job['running']):
+    if summary is None:
+        st.info('Tissue enrichment will be calculated once all batches are scored.')
+    else:
+        st.dataframe(summary,width='stretch',hide_index=True,height=(len(summary)+1)*35+3,
+            column_config={
+                'Cell type':st.column_config.TextColumn('Tissue'),
+                'AUROC':st.column_config.NumberColumn(format='%.4f',help='Probability that a bin of this tissue scores higher than a bin of another tissue, with half credit for ties.'),
+                'p-value':st.column_config.NumberColumn(format='%.3e',help='Two-sided Mann–Whitney U test, with tie and continuity correction.'),
+                'Corrected p-value (BH)':st.column_config.NumberColumn(format='%.3e',help='Benjamini–Hochberg correction across all annotated tissues in this query.')})
+        st.caption('Two-sided Mann–Whitney p-values; Benjamini–Hochberg correction across tissues for this query. Values that underflow to zero are reported at the smallest positive float (≈4.94 × 10⁻³²⁴). Bin-level tests assume independence; spatial correlation can make these p-values optimistic.')
+    if summary is not None:
         st.download_button('Download enrichment table',summary.to_csv(index=False).encode(),
                            file_name=f"{manifest['dataset']}-celltype-enrichment.csv",mime='text/csv',key='download_enrichment')
         export=cells[['cell_index','source_obs_id','x','y','celltype']].copy()

@@ -10,22 +10,26 @@ The initial source is GEO **GSM9629296 / CS12-13_E2S3_HESTA**.
 .conda-env/bin/streamlit run app.py
 ```
 
-Open http://localhost:8501. The app defaults to the small slice at
-`data/GSM9629296/` and does not use Colab. All 13,257 observations are plotted
-immediately. Scoring starts automatically and processes the two batches in order;
-unscored bins receive a nearest-scored-bin preview while exact AUROCs arrive.
-
-The slice selector also offers CS20 E1S7 (265,988 bins). Its progressive files
+Open http://localhost:8501. The app defaults to CS20 at `data/GSM9629349/`
+(265,988 bins) and does not use Colab. Scoring starts automatically.
+The slice selector also offers CS12–13 and CS23. The progressive files
 use spatial refinement order, in batches of 32,768 bins. Occupied grid blocks
 are sampled at widths 16, 8, 4, 2, and 1, retaining earlier representatives and
 adding the bin nearest each newly unrepresented block's center. Additions
 within a level are shuffled with a fixed seed so partial levels cover the tissue.
 The first full batch includes several levels; it is not a 16-bin-resolution image.
-Unscored tissue bins borrow the nearest scored bin's color for display only.
-Hover distinguishes preview values, tissue gaps remain empty, and actual scores
-replace previews as batches finish. The table, counts, color limits and CSV
-exports always use actual scores; unscored entries remain missing in exports.
-At completion the display is exact. The small slice uses the same spatial
+The browser receives compact source-grid positions and integer tissue codes,
+then indexed float64 score updates. Geometry is reused after acknowledgment;
+a replaced iframe receives a fresh snapshot. At the initial zoom, a canvas
+raster aggregates source bins into blocks sized for the display resolution.
+Numeric blocks show the mean of scored values; tissue blocks show the majority
+annotation (alphabetical tie break). Zooming restores individual source bins.
+Unscored occupied blocks receive a display-only neighboring preview using a
+multi-source grid flood fill, with Manhattan distance and deterministic ties.
+Empty blocks stay transparent; subpixel gaps may be merged in an overview block.
+Hover distinguishes block means, previews and individual-bin values. Statistics,
+color limits and CSV exports always use original scores, never raster values.
+The small slice uses the same spatial
 refinement order in two batches of 8,192 and 5,065 bins.
 Rebuild this format on Colab with `--sampling spatial --shard-cells 32768
 --skip-spatial` using `scripts/run_colab.py`; no duplicate spatial files are needed.
@@ -58,22 +62,24 @@ Rebuild this format on Colab with `--sampling spatial --shard-cells 32768
   depends on completed batches, not the current zoom viewport.
 - Toggle **Colour by cell type** on for all 19 source labels; the colour key occupies a fixed area in both modes, preserving the viewport.
   The score calculation is preserved.
-- Pan, zoom or invert the y axis. Bins render as filled grid tiles that scale
-  with zoom; positions without data stay empty. Pause/resume is available while
-  scoring. New input runs clear previous results; editing either gene field restarts scoring when the field loses focus. Completed or paused results can be downloaded as CSV.
+- Drag to pan, scroll to zoom, double-click to reset, or save the current tissue
+  raster as PNG. The sidebar color switch preserves the viewport. New inputs
+  clear previous results and restart scoring when the gene field loses focus.
+  Completed results can be downloaded as CSV.
 
-The always-visible cell-type enrichment table performs a second-level analysis:
+The cell-type enrichment table is calculated once after all batches finish and
+reused until the slice or input query changes. Before completion it shows a
+waiting message. The table performs a second-level analysis:
 it ranks scored bins by their gene-set AUROC, then calculates a one-versus-rest
 AUROC for each annotation. Values above 0.5 indicate higher-ranking bins of
 that type; values below 0.5 indicate lower-ranking bins. This is not the mean
 or median of the original gene-set scores. Two-sided Mann–Whitney U p-values
 use the asymptotic distribution with tie and continuity correction. BH adjusted
 p-values correct across all annotated types for the current query (untestable
-types count as p=1 for correction but display missing values). Unscored bins
-are excluded; interim results update per batch. Spatial correlation means
+types count as p=1 for correction but display missing values). Only fully scored queries produce enrichment results. Spatial correlation means
 bin-level independence is imperfect, so p-values are exploratory rather than
 replicate-level evidence. The table and individual-bin scores can be downloaded
-separately when scoring is complete or paused.
+separately when scoring is complete.
 
 Rank-file caching is bounded to one batch to limit server memory use. A Streamlit fragment processes one
 batch per update, leaving the input controls usable. The scoring timer reports

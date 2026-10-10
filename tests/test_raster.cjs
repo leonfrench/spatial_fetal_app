@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict');
+const {aggregate,factorForScale}=require('../spatial_app/tile_component/raster.js');
+const g={width:4,height:2,positions:new Uint32Array([0,1,4,7]),categories:new Uint16Array([0,1,1,0]),labels:['A','B']};
+const scores=new Float64Array([.2,.6,NaN,.8]);
+let r=aggregate(g,scores,2,'Gene-set AUROC',{});
+assert.equal(r.values[0],.4);assert.equal(r.measured[0],2);assert.equal(r.occupied[0],3);
+assert.equal(r.values[1],.8);
+r=aggregate(g,scores,1,'Gene-set AUROC',{});
+assert.equal(r.values[0],.2);assert.equal(r.occupied[2],0);assert.equal(r.preview[4],1);assert(Number.isNaN(scores[2]));
+r=aggregate(g,scores,2,'Cell type',{});assert.equal(r.categories[0],1);
+r=aggregate(g,scores,1,'Tissue AUROC',{A:.45,B:.55});assert.equal(r.values[4],.55);
+assert.equal(factorForScale(.2),4);assert.equal(factorForScale(2),1);assert.equal(factorForScale(.2,2),2);
+console.log('Raster aggregation, gaps, preview, category and zoom tests passed');
