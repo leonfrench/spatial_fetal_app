@@ -52,7 +52,9 @@ def metadata(path, version):
     return manifest,cells,genes
 
 
-@st.cache_resource(max_entries=32,show_spinner=False)
+# Decoded CS23 batches total ~2.5 GiB. Retain only the current batch so
+# progressive scoring does not accumulate the whole dataset in server memory.
+@st.cache_resource(max_entries=1,show_spinner=False)
 def cached_shard(path, checksum):
     shard = load_shard(path)
     for value in shard.values():

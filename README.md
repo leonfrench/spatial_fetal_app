@@ -75,7 +75,7 @@ bin-level independence is imperfect, so p-values are exploratory rather than
 replicate-level evidence. The table and individual-bin scores can be downloaded
 separately when scoring is complete or paused.
 
-Rank-file caching is bounded to 32 batches. A Streamlit fragment processes one
+Rank-file caching is bounded to one batch to limit server memory use. A Streamlit fragment processes one
 batch per update, leaving the input controls usable. The scoring timer reports
 computation only; disk reads and browser rendering are additional.
 
