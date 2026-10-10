@@ -116,3 +116,31 @@ def test_enrichment_only_once_per_completed_query(monkeypatch):
     app.run()
     assert not app.exception
     assert len(calls)==2
+
+
+def test_previous_plot_is_retained_until_new_query_completes():
+    root=Path(__file__).resolve().parents[1]
+    app=AppTest.from_file(str(root/'app.py'),default_timeout=30).run()
+    assert np.isnan(app.session_state['displayed_plot']['scores']).all()
+    app.run()
+    assert not app.exception
+    previous=app.session_state['displayed_plot']['scores'].copy()
+    previous_signature=app.session_state['displayed_plot']['signature']
+    app.text_area(key='target_input').set_value('PAX6').run()
+    assert not app.exception
+    assert app.session_state['job']['running']
+    np.testing.assert_equal(app.session_state['displayed_plot']['scores'],previous)
+    assert app.session_state['displayed_plot']['signature']==previous_signature
+    app.run()
+    assert not app.exception
+    np.testing.assert_equal(app.session_state['displayed_plot']['scores'],app.session_state['scores'])
+    assert app.session_state['displayed_plot']['signature']!=previous_signature
+    # Invalid inputs and a different slice must not erase the previous plot.
+    latest=app.session_state['displayed_plot']['scores'].copy()
+    app.text_area(key='target_input').set_value('NOT_A_GENE').run()
+    np.testing.assert_equal(app.session_state['displayed_plot']['scores'],latest)
+    app.text_area(key='target_input').set_value('PAX6')
+    app.selectbox(key='selected_slice').set_value(str(root/'data/GSM9629365')).run()
+    assert not app.exception
+    assert app.session_state['displayed_plot']['dataset']=='GSM9629296'
+    np.testing.assert_equal(app.session_state['displayed_plot']['scores'],latest)

@@ -158,7 +158,7 @@ with st.sidebar:
 
 st.caption('SPATIAL TRANSCRIPTOMICS  /  HESTA')
 sample_label = SLICE_LABELS.get(manifest['dataset'],manifest['dataset'])
-st.markdown(f'**{sample_label}** &nbsp; · &nbsp; All observations stay visible as each batch is scored.')
+st.markdown(f'**{sample_label}** &nbsp; · &nbsp; The plot updates when all batches finish.')
 
 
 @st.fragment(run_every=0.25 if st.session_state.job and st.session_state.job['running'] else None)
@@ -215,6 +215,17 @@ def render_explorer():
         st.progress(count/len(cells),text=f"{label} · {job['next_batch']} of {len(paths)} batches · vectorized scoring {job['compute_seconds']:.2f}s")
     else:
         st.info('All bins are shown. Enter a valid target gene set to calculate AUROC automatically, or switch to tissue colours.')
+    print(f"[timing] {timing_context} scoring_update_s={time.perf_counter()-render_started:.3f}",flush=True)
+
+
+def render_results():
+    # The custom component lives outside the scoring fragment. Timer updates
+    # only change progress; a full rerun publishes the completed snapshot.
+    render_started = time.perf_counter()
+    timing_context = f"dataset={manifest['dataset']} mode={mode!r}"
+    job = st.session_state.job
+    scores = st.session_state.scores
+    count = int(np.isfinite(scores).sum())
     summary = st.session_state.get('enrichment_summary')
     if count == len(cells) and summary is None:
         started = time.perf_counter()
@@ -223,9 +234,32 @@ def render_explorer():
         st.session_state.enrichment_summary = summary
         print(f"[timing] {timing_context} enrichment_s={time.perf_counter()-started:.3f}",flush=True)
     type_aurocs = summary.set_index('Cell type')['AUROC'].to_dict() if summary is not None else {}
-    tile_chart(cells,scores,version=version,mode=mode,type_aurocs=type_aurocs,
-               filename=f"{manifest['dataset']}-spatial",
-               rotation=90 if manifest['dataset']=='GSM9629349' else (70 if manifest['dataset']=='GSM9629365' else 0))
+    displayed = st.session_state.get('displayed_plot')
+    ready = summary is not None and count == len(cells)
+    if displayed is None or (ready and displayed['signature'] != input_signature):
+        displayed = dict(
+            cells=cells[['x','y','celltype']].copy(),
+            scores=scores.copy() if ready else np.full(len(cells),np.nan),
+            version=version, dataset=manifest['dataset'],
+            signature=input_signature if ready else None,
+            type_aurocs=type_aurocs if ready else {}, mode=mode,
+            rotation=90 if manifest['dataset']=='GSM9629349' else (70 if manifest['dataset']=='GSM9629365' else 0))
+        st.session_state.displayed_plot = displayed
+    pending = displayed['signature'] != input_signature
+    if not pending:
+        displayed['mode'] = mode
+    plot_status = 'Showing the completed results for the current query.'
+    if pending:
+        if displayed['signature'] is None:
+            plot_status = 'Calculating results. The plot will update when all batches finish.'
+        else:
+            old_slice = SLICE_LABELS.get(displayed['dataset'],displayed['dataset'])
+            status = 'Calculating updated results' if job and job['running'] else 'The current query has not completed'
+            plot_status = f'{status}. Showing the previous completed plot for {old_slice}; it will be replaced when the new results are ready.'
+    st.caption(plot_status)
+    tile_chart(displayed['cells'],displayed['scores'],version=displayed['version'],
+               mode=displayed['mode'],type_aurocs=displayed['type_aurocs'],
+               filename=f"{displayed['dataset']}-spatial",rotation=displayed['rotation'])
     st.caption('Overview blocks show mean scored AUROC, or majority tissue; zoom in for individual bins and exact bin hover. '
                'Unscored occupied blocks use a neighboring scored-block preview when available; empty blocks stay blank. '
                'Previews and overview aggregation never change statistics or downloads. '
@@ -263,3 +297,4 @@ def render_explorer():
 
 
 render_explorer()
+render_results()
