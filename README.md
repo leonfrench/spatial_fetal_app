@@ -32,7 +32,10 @@ annotation (alphabetical tie break). Zooming restores individual source bins.
 Unscored occupied blocks receive a display-only neighboring preview using a
 multi-source grid flood fill, with Manhattan distance and deterministic ties.
 Empty blocks stay transparent; subpixel gaps may be merged in an overview block.
-Hover distinguishes block means, previews and individual-bin values. Statistics,
+Hover shows only tissue and AUROC for the occupied bin nearest the block center
+(stable input order breaks ties), or the individual bin at full resolution.
+Unscored representatives show "Not scored", never a borrowed preview value.
+In Tissue AUROC mode, hover uses that representative tissue’s enrichment AUROC. Statistics,
 color limits and CSV exports always use original scores, never raster values.
 The small slice uses the same spatial
 refinement order in two batches of 8,192 and 5,065 bins.

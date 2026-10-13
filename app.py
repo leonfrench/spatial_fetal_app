@@ -263,7 +263,7 @@ def render_results():
         tile_chart(displayed['cells'],displayed['scores'],version=displayed['version'],
                    mode=displayed['mode'],type_aurocs=displayed['type_aurocs'],
                    filename=f"{displayed['dataset']}-spatial",rotation=displayed['rotation'])
-        st.caption('Overview blocks show mean scored AUROC, or majority tissue; zoom in for individual bins and exact bin hover. '
+        st.caption('Overview blocks show mean scored AUROC, or majority tissue. Hover shows the tissue and AUROC of the bin nearest the block center; zoom in for individual bins. '
                    'Unscored occupied blocks use a neighboring scored-block preview when available; empty blocks stay blank. '
                    'Drag to pan, scroll to zoom, double-click to reset.')
     slice_total=len(cells)*len(genes)
