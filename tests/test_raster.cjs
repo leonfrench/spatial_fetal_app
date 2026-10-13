@@ -18,9 +18,15 @@ assert.equal(hoverText(g,scores,r,0,'Gene-set AUROC',{}),'A\nAUROC: 0.2000');
 assert.equal(hoverText(g,scores,r,0,'Cell type',{}),'A\nAUROC: 0.2000');
 assert.equal(hoverText(g,scores,r,0,'Tissue AUROC',{A:.45}),'A\nAUROC: 0.4500');
 r=aggregate(g,scores,1,'Gene-set AUROC',{});
-assert.equal(hoverText(g,scores,r,4,'Gene-set AUROC',{}),'B\nAUROC: Not scored');
+assert.equal(hoverText(g,scores,r,4,'Gene-set AUROC',{}),'B\nAUROC: 0.2000 (approximate)');
 assert.equal(hoverText(g,scores,r,2,'Gene-set AUROC',{}),'');
 const centered={width:3,height:3,positions:new Uint32Array([0,4,8]),categories:new Uint16Array([0,1,0]),labels:['A','B']};
 r=aggregate(centered,new Float64Array([.1,.5,.9]),4,'Gene-set AUROC',{});
 assert.equal(r.representatives[0],1); // Center of a clipped edge block.
+const incomplete=new Float64Array([.1,NaN,.9]);
+r=aggregate(centered,incomplete,4,'Gene-set AUROC',{});
+assert.equal(hoverText(centered,incomplete,r,0,'Gene-set AUROC',{}),'B\nAUROC: 0.5000 (approximate)');
+const empty=new Float64Array([NaN,NaN,NaN]);
+r=aggregate(centered,empty,4,'Gene-set AUROC',{});
+assert.equal(hoverText(centered,empty,r,0,'Gene-set AUROC',{}),'B\nAUROC: Not scored');
 console.log('Representative-bin hover tests passed');

@@ -45,6 +45,9 @@ function hoverText(g,scores,raster,block,mode,aucs) {
  if(id<0)return '';
  const tissue=g.labels[g.categories[id]];
  const value=mode==='Tissue AUROC'?aucs[tissue]:scores[id];
+ if(!Number.isFinite(value)&&mode==='Gene-set AUROC'&&Number.isFinite(raster.values[block])){
+  return tissue+'\nAUROC: '+raster.values[block].toFixed(4)+' (approximate)';
+ }
  return tissue+'\nAUROC: '+(Number.isFinite(value)?value.toFixed(4):'Not scored');
 }
 function factorForScale(scale,dpr=1){let f=1;while(f*2*scale*dpr<=1)f*=2;return f;}

@@ -34,7 +34,9 @@ multi-source grid flood fill, with Manhattan distance and deterministic ties.
 Empty blocks stay transparent; subpixel gaps may be merged in an overview block.
 Hover shows only tissue and AUROC for the occupied bin nearest the block center
 (stable input order breaks ties), or the individual bin at full resolution.
-Unscored representatives show "Not scored", never a borrowed preview value.
+In gene-set mode, unscored representatives show the AUROC used to color the
+block (including borrowed previews), marked "approximate". If no value is
+available yet, hover still shows "Not scored".
 In Tissue AUROC mode, hover uses that representative tissue’s enrichment AUROC. Statistics,
 color limits and CSV exports always use original scores, never raster values.
 The small slice uses the same spatial
