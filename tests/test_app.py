@@ -21,6 +21,20 @@ def test_cs23_slice_loads_and_scores_first_spatial_batch():
     assert app.session_state['enrichment_summary'] is None
 
 
+def test_cs12_e2s7_loads_and_completes():
+    root=Path(__file__).resolve().parents[1]
+    app=AppTest.from_file(str(root/'app.py'),default_timeout=30).run()
+    app.selectbox(key='selected_slice').set_value(str(root/'data/GSM9629300')).run()
+    assert not app.exception
+    assert len(app.session_state['scores'])==9603
+    assert np.isfinite(app.session_state['scores']).sum()==8192
+    assert app.session_state['job']['query'].universe_size==17189
+    app.run()
+    assert not app.exception
+    assert np.isfinite(app.session_state['scores']).all()
+    assert len(app.dataframe[0].value)==16
+
+
 def test_slice_switch_restarts_scoring_and_preserves_inputs():
     root=Path(__file__).resolve().parents[1]
     app=AppTest.from_file(str(root/'app.py'),default_timeout=30).run()

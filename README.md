@@ -389,8 +389,8 @@ inside the VM automatically and stops on a failure before packaging.
 ## Active local data
 
 
-Only the three coarse-to-fine exports (`data/GSM9629296`, `data/GSM9629349`,
-and `data/GSM9629365`)
+Only the four coarse-to-fine exports (`data/GSM9629296`, `data/GSM9629300`,
+`data/GSM9629349`, and `data/GSM9629365`)
 and the species conversion file are retained. Obsolete exports, batch backups,
 raw H5AD input, and unused per-export gene-mapping/HGNC snapshots were removed.
 Active exports retain rank batches, cells/genes metadata, manifests, and historical
@@ -410,3 +410,12 @@ processed and validated on a standard-RAM Colab VM. The coarse-to-fine export
 uses 26 progressive batches (25 × 32,768 bins, then 5,915), with no duplicate
 spatial files. The largest file is 62.1 MB; the export is approximately 1.35 GB.
 The 17.9 GB source H5AD stays on Colab and is not downloaded locally.
+
+## CS12–13 E2S7
+
+The slice selector includes CS12–13 · Embryo 2 · Section 7
+([GSM9629300](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM9629300)).
+Processed and validated on standard-RAM Colab: 9,603 bins, 17,189 retained
+protein-coding genes, and 16 tissue labels. Two coarse-to-fine batches contain
+8,192 and 1,411 bins. The largest file is 27.5 MB. Only the processed export
+is downloaded; no raw H5AD or duplicate spatial files are stored locally.

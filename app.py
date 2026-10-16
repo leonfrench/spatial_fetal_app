@@ -18,13 +18,16 @@ ROOT = Path(__file__).resolve().parent
 DEFAULT_DATA = Path(os.environ.get('FETAL_APP_DATA',str(ROOT/'data/GSM9629349'))).resolve()
 SLICE_LABELS = {
     'GSM9629296':'CS12–13 · Embryo 2 · Section 3',
+    'GSM9629300':'CS12–13 · Embryo 2 · Section 7',
     'GSM9629349':'CS20 · Embryo 1 · Section 7',
     'GSM9629365':'CS23 · Embryo 2 · Section 8',
 }
 
 st.set_page_config(page_title='Spatial · Gene-set explorer',page_icon='◉',layout='wide',initial_sidebar_state='expanded')
 st.markdown('''<style>
-.block-container {padding-top:4rem; padding-bottom:1rem; max-width:1600px;}
+.block-container {padding-top:2.5rem; padding-bottom:1rem; max-width:1600px;}
+[data-testid="stMain"] [data-testid="stVerticalBlock"] {gap:0.4rem;}
+[data-testid="stMain"] [data-testid="stMarkdownContainer"] p {margin-bottom:0.25rem;}
 [data-testid="stSidebar"] h2 {font-size:1.1rem;}
 h1 {font-size:2rem !important; font-weight:650 !important; letter-spacing:-.04em;}
 [data-testid="stMetricValue"] {font-size:1.55rem; font-weight:600;}
@@ -162,7 +165,7 @@ with st.sidebar:
         'doi:10.1038/s41586-026-10545-0.')
 
 st.markdown(
-    '<div style="color:#000;font-family:inherit;font-size:24px;font-weight:400;line-height:1.4;margin-bottom:12px;">'
+    '<div style="color:#000;font-family:inherit;font-size:24px;font-weight:400;line-height:1.3;margin-bottom:0;">'
     'Polygenic enrichment tool for the human embryo transcriptome atlas by '
     '<a href="https://doi.org/10.1038/s41586-026-10545-0" target="_blank" '
     'rel="noopener noreferrer" style="color:#000;text-decoration:underline;">'
@@ -215,8 +218,6 @@ def render_progress():
         if job['error']:
             st.error(f"Scoring stopped: {job['error']}")
         q=job['query']
-        active=', '.join(q.target_symbols[:12]) + (' …' if len(q.target_symbols)>12 else '')
-        st.caption(f"Active targets: {active}. " + ('Ranks recomputed within your background universe.' if q.background is not None else 'Universe: all retained protein-coding genes.'))
         if q.unknown_target or q.unknown_background or q.outside_background:
             with st.expander(f'Gene matching · {len(q.unknown_target)+len(q.outside_background)} target symbols excluded',expanded=False):
                 if q.unknown_target: st.warning('Targets not in dataset: '+', '.join(q.unknown_target))
