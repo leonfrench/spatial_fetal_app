@@ -1,0 +1,113 @@
+{
+  "verified_utc": "2026-10-16T01:02:44.090746+00:00",
+  "session": "fetal-20261015T235031-bb886d",
+  "remote_transport": "/content/fetal-runs/GSM9629338-20261016T005142-c29538/transport",
+  "verification": "streaming SHA-256 only; all scientific validation performed on Colab",
+  "version": 1,
+  "remote_output": "/content/fetal-runs/GSM9629338-20261016T005142-c29538/output",
+  "files": [
+    {
+      "path": "cells.parquet",
+      "bytes": 13593181,
+      "sha256": "bf60dda5954cc0663ce495130b2e05f02c37529a3f5547cf0a3ed214cd4ad8e3"
+    },
+    {
+      "path": "colab_execution.json",
+      "bytes": 1641,
+      "sha256": "086e6a184c64ceae3ebecf0fc9436cdd118911ab79b55495eb3a783ff1beb834"
+    },
+    {
+      "path": "gene_mapping.parquet",
+      "bytes": 2466833,
+      "sha256": "e7525a7e5e4b96632734e9e7666a8b2a9e8c1147c313916a2ba0f87400dae270"
+    },
+    {
+      "path": "genes.parquet",
+      "bytes": 830337,
+      "sha256": "083aca912c095d3f2a116a938fab497868b07ff08c0f984784d164f87ac8072c"
+    },
+    {
+      "path": "hgnc_protein_coding.parquet",
+      "bytes": 501259,
+      "sha256": "aaaeef94c183b268c8384b0d4e88e7d8f4a0dc8d28bb99894027b9fe23efce44"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 5289,
+      "sha256": "6175933b20ccc6e383c3dae6a1548990c933c81f2b7b5a184725babaa8b44aac"
+    },
+    {
+      "path": "progressive/00000.npz",
+      "bytes": 74878838,
+      "sha256": "ca8e5a327e385e03e26cc3f79cdbf4f60cd59f5257b546ec05f5124f0918ab41"
+    },
+    {
+      "path": "progressive/00001.npz",
+      "bytes": 75143340,
+      "sha256": "faa934bfc56a88cbc77307ed7842313fd860efd7534c6e52b5927c1503c01474"
+    },
+    {
+      "path": "progressive/00002.npz",
+      "bytes": 74704115,
+      "sha256": "aa0e41c13d07e9f00f0d4ffc44f7192ad289cf1593667f4db48fccfdcc1db178"
+    },
+    {
+      "path": "progressive/00003.npz",
+      "bytes": 74846135,
+      "sha256": "225c4326f4a572742ec16a34947b630095b391933ef7902233ebca1058227d4a"
+    },
+    {
+      "path": "progressive/00004.npz",
+      "bytes": 67512129,
+      "sha256": "4a4fa5750e8925df872850e05daaf0a85ee11068fc695b78ec42318c1a31b0a3"
+    },
+    {
+      "path": "validation_colab.json",
+      "bytes": 746,
+      "sha256": "a0070b4e1232c609f62b5ce2b5e0c58e1027d5dc2ab08ea6f207f94003bec002"
+    }
+  ],
+  "bundles": [
+    {
+      "path": "part-00000.zip",
+      "bytes": 13595062,
+      "sha256": "2b4945fc9ffea7722754e47d572fbb181611aa8474c727a3b55dc24a0b7ee088"
+    },
+    {
+      "path": "part-00001.zip",
+      "bytes": 3804190,
+      "sha256": "86b01302cde348f778564cd4c0fe06f0e2781cb8a0fd7fd8ec8a1dae8f932c08"
+    },
+    {
+      "path": "part-00002.zip",
+      "bytes": 74878978,
+      "sha256": "bf10f2ab3c99a1f9b917b14b540670544872710a4f6d1fb37c6b9a96566f11af"
+    },
+    {
+      "path": "part-00003.zip",
+      "bytes": 75143480,
+      "sha256": "6eb33e480414898f01c72cac9fbc0174dd4d19fb4c632e3a6e98d65773c4643c"
+    },
+    {
+      "path": "part-00004.zip",
+      "bytes": 74704255,
+      "sha256": "8055cf68b000148ec429c8d56e096d87e2614882a66bfe4dd8f46d8dbbe079e0"
+    },
+    {
+      "path": "part-00005.zip",
+      "bytes": 74846275,
+      "sha256": "63ac4a26b4380878fe7175898c8db7d967bcd5f9a0c244a7b4ccf7c03a85eb06"
+    },
+    {
+      "path": "part-00006.zip",
+      "bytes": 67512269,
+      "sha256": "4275792408d547d94c436c7b30edd057030e5d70a85d087f9165d3e4e67122e8"
+    },
+    {
+      "path": "part-00007.zip",
+      "bytes": 886,
+      "sha256": "7c87c6da371dd6cd262491d109e72632c2dd139410e979e138c43f8de35a79b8"
+    }
+  ],
+  "total_processed_bytes": 384483843
+}

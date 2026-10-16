@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import numpy as np
 import pytest
 from streamlit.testing.v1 import AppTest
@@ -7,6 +8,25 @@ from streamlit.testing.v1 import AppTest
 @pytest.fixture(autouse=True)
 def small_default(monkeypatch):
     monkeypatch.setenv('FETAL_APP_DATA',str(Path(__file__).resolve().parents[1]/'data/GSM9629296'))
+
+
+@pytest.mark.parametrize('dataset',['GSM9629326','GSM9629338'])
+def test_new_midstage_slices_complete(dataset):
+    root=Path(__file__).resolve().parents[1]
+    manifest=json.loads((root/'data'/dataset/'manifest.json').read_text())
+    app=AppTest.from_file(str(root/'app.py'),default_timeout=60).run()
+    app.selectbox(key='selected_slice').set_value(str(root/'data'/dataset)).run()
+    assert not app.exception
+    assert len(app.session_state['scores'])==manifest['n_cells']
+    first=next(f for f in manifest['files'] if f['path']==manifest['progressive'][0])
+    assert np.isfinite(app.session_state['scores']).sum()==first['n_cells']
+    assert app.session_state['job']['query'].universe_size==manifest['n_genes']
+    for _ in range(len(manifest['progressive'])-1):
+        app.run()
+        assert not app.exception
+    assert np.isfinite(app.session_state['scores']).all()
+    assert not app.session_state['job']['running']
+    assert len(app.dataframe[0].value)==manifest['n_celltypes']
 
 
 def test_cs23_slice_loads_and_scores_first_spatial_batch():

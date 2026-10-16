@@ -389,8 +389,8 @@ inside the VM automatically and stops on a failure before packaging.
 ## Active local data
 
 
-Only the four coarse-to-fine exports (`data/GSM9629296`, `data/GSM9629300`,
-`data/GSM9629349`, and `data/GSM9629365`)
+Only the six coarse-to-fine exports (`data/GSM9629296`, `data/GSM9629300`,
+`data/GSM9629326`, `data/GSM9629338`, `data/GSM9629349`, and `data/GSM9629365`)
 and the species conversion file are retained. Obsolete exports, batch backups,
 raw H5AD input, and unused per-export gene-mapping/HGNC snapshots were removed.
 Active exports retain rank batches, cells/genes metadata, manifests, and historical
@@ -419,3 +419,17 @@ Processed and validated on standard-RAM Colab: 9,603 bins, 17,189 retained
 protein-coding genes, and 16 tissue labels. Two coarse-to-fine batches contain
 8,192 and 1,411 bins. The largest file is 27.5 MB. Only the processed export
 is downloaded; no raw H5AD or duplicate spatial files are stored locally.
+
+## CS17 E1S6 and CS19 E1S3
+
+Both slices were processed and validated on standard-RAM Colab and use
+coarse-to-fine batches of up to 32,768 bins:
+
+| Slice | GEO accession | Bins | Retained genes | Tissues | Batches | Largest file |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| CS17 E1S6 | [GSM9629326](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM9629326) | 56,279 | 18,144 | 18 | 2 | 77.9 MB |
+| CS19 E1S3 | [GSM9629338](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM9629338) | 160,662 | 18,601 | 17 | 5 | 75.1 MB |
+
+Only processed rank batches, cell/gene metadata, and provenance reports are
+retained locally. Raw H5AD inputs remain on Colab; duplicate spatial files and
+unused gene-mapping snapshots are omitted. Both slices use their source orientation.

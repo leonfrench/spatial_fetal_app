@@ -1,0 +1,39 @@
+{
+  "completed_utc": "2026-10-16T00:50:50.938648+00:00",
+  "hostname": "cbb80b0e2227",
+  "platform": "Linux-6.6.122+-x86_64-with-glibc2.39",
+  "python": "3.13.16 (main, Oct  1 2026, 15:40:24) [GCC 13.3.0]",
+  "processing_location": "Google Colab VM",
+  "raw_input": "/content/fetal-runs/GSM9629326-20261016T004736-2d8067/source.h5ad",
+  "output": "/content/fetal-runs/GSM9629326-20261016T004736-2d8067/output",
+  "physical_memory_bytes": 13605830656,
+  "peak_child_rss_bytes": 1544519680,
+  "peak_memory_note": "Linux child-process peak RSS; excludes parent kernel and is not a prediction for larger inputs",
+  "disk_free_bytes": 217775992832,
+  "stages": [
+    {
+      "script": "scripts/prepare_ranks.py",
+      "seconds": 179.401,
+      "passed": true
+    },
+    {
+      "script": "tests/test_rank_io.py",
+      "seconds": 0.971,
+      "passed": true
+    },
+    {
+      "script": "scripts/validate_export.py",
+      "seconds": 6.908,
+      "passed": true
+    }
+  ],
+  "processing_and_validation_seconds": 187.282,
+  "source_code_sha256": {
+    "scripts/rank_io.py": "bffd77697fcd4db770ed92a5e15c89cbba3ebfb52a7322e0bb4bd3a3d62bf4e6",
+    "scripts/validate_export.py": "f85eaafb9c280404aae752e7fcb3968fbb356c74d0bc0d85f3df278954b1aa4c",
+    "scripts/spatial_order.py": "bfcbd429a5407ca50babb87032e7f0256fc322016bd464829d32828506107bef",
+    "scripts/colab_worker.py": "fcf3399df23f9656e37d47a1a3a4682955135655bf0eca59baf8b99cbeee6e42",
+    "scripts/prepare_ranks.py": "17369161b6831185ad53268d506268262f63021666b41942f38d37f2822446b1",
+    "tests/test_rank_io.py": "fc4ed1f0cfa83215c3f072101721deb7bb079acb98b8d3cbca8b4623192bdb66"
+  }
+}

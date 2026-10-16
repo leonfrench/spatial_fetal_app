@@ -1,0 +1,26 @@
+{
+  "checksums_verified": 6,
+  "n_cells": 56279,
+  "n_genes": 18144,
+  "all_rank_sums_valid": true,
+  "layouts_identical": null,
+  "reader_pairwise_auc_checks": 2,
+  "median_load_ms": 893.7875299998268,
+  "median_auroc_ms": 403.51382350036147,
+  "benchmark_gene_set": [
+    "DCX",
+    "NES",
+    "PAX6",
+    "SOX2",
+    "TUBB3"
+  ],
+  "execution_host": "cbb80b0e2227",
+  "execution_platform": "Linux-6.6.122+-x86_64-with-glibc2.39",
+  "benchmark_note": "Processing host filesystem; varying shard sizes, OS cache may apply; excludes network transfer",
+  "total_bytes": 142269299,
+  "max_file_bytes": 77927860,
+  "progressive_bytes": 133714700,
+  "spatial_bytes": 0,
+  "genes_detected_zero_cells": 92,
+  "genes_detected_fewer_than_3_cells": 607
+}

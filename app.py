@@ -19,13 +19,15 @@ DEFAULT_DATA = Path(os.environ.get('FETAL_APP_DATA',str(ROOT/'data/GSM9629349'))
 SLICE_LABELS = {
     'GSM9629296':'CS12–13 · Embryo 2 · Section 3',
     'GSM9629300':'CS12–13 · Embryo 2 · Section 7',
+    'GSM9629326':'CS17 · Embryo 1 · Section 6',
+    'GSM9629338':'CS19 · Embryo 1 · Section 3',
     'GSM9629349':'CS20 · Embryo 1 · Section 7',
     'GSM9629365':'CS23 · Embryo 2 · Section 8',
 }
 
 st.set_page_config(page_title='Spatial · Gene-set explorer',page_icon='◉',layout='wide',initial_sidebar_state='expanded')
 st.markdown('''<style>
-.block-container {padding-top:2.5rem; padding-bottom:1rem; max-width:1600px;}
+.block-container {padding-top:4rem; padding-bottom:1rem; max-width:1600px;}
 [data-testid="stMain"] [data-testid="stVerticalBlock"] {gap:0.4rem;}
 [data-testid="stMain"] [data-testid="stMarkdownContainer"] p {margin-bottom:0.25rem;}
 [data-testid="stSidebar"] h2 {font-size:1.1rem;}
@@ -85,7 +87,8 @@ except (OSError,ValueError,KeyError) as exc:
     st.stop()
 paths = manifest['progressive']
 checksums = {f['path']:f['sha256'] for f in manifest['files']}
-version = f"{DATA}:{manifest['created_utc']}"
+rotation = {'GSM9629349':90,'GSM9629365':70,'GSM9629300':-100}.get(manifest['dataset'],0)
+version = f"{DATA}:{manifest['created_utc']}:rotation={rotation}"
 if st.session_state.get('dataset_version') != version:
     st.session_state.dataset_version = version
     st.session_state.scores = np.full(len(cells),np.nan)
@@ -254,7 +257,7 @@ def render_results():
             version=version, dataset=manifest['dataset'],
             signature=input_signature if ready else None, count=count if ready else 0,
             type_aurocs=type_aurocs if ready else {}, mode=mode,
-            rotation=90 if manifest['dataset']=='GSM9629349' else (70 if manifest['dataset']=='GSM9629365' else 0))
+            rotation=rotation)
         st.session_state.displayed_plot = displayed
     pending = displayed['signature'] != input_signature
     if not pending:

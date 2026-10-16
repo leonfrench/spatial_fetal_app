@@ -1,0 +1,78 @@
+{
+  "verified_utc": "2026-10-16T00:51:32.604040+00:00",
+  "session": "fetal-20261015T235031-bb886d",
+  "remote_transport": "/content/fetal-runs/GSM9629326-20261016T004736-2d8067/transport",
+  "verification": "streaming SHA-256 only; all scientific validation performed on Colab",
+  "version": 1,
+  "remote_output": "/content/fetal-runs/GSM9629326-20261016T004736-2d8067/output",
+  "files": [
+    {
+      "path": "cells.parquet",
+      "bytes": 5191319,
+      "sha256": "7067e8a307231a855738c396a2c1ba344215dc9631b3f2ccb7ab35c94e982ac4"
+    },
+    {
+      "path": "colab_execution.json",
+      "bytes": 1640,
+      "sha256": "c63f46cb4ca4b8cbdb4a58bdfdbea4e85e85a91c22d92c3143bb13b974c2ebcc"
+    },
+    {
+      "path": "gene_mapping.parquet",
+      "bytes": 2081322,
+      "sha256": "be6fc8eb3a501415e839aec5638752ff34e40c1bdc75d6b06cd9c00a3599644a"
+    },
+    {
+      "path": "genes.parquet",
+      "bytes": 776632,
+      "sha256": "0d88aa0a9b997e333a3883a8e90051128976a4cbc6651ad7fb593d073e12f569"
+    },
+    {
+      "path": "hgnc_protein_coding.parquet",
+      "bytes": 501259,
+      "sha256": "aaaeef94c183b268c8384b0d4e88e7d8f4a0dc8d28bb99894027b9fe23efce44"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 4067,
+      "sha256": "4c785e08148a355492220fe9386c1bb15586459bf16fe95797de6ed66311c7a0"
+    },
+    {
+      "path": "progressive/00000.npz",
+      "bytes": 77927860,
+      "sha256": "25a30f9be193dbb62df0fb0929c191054b421c1c67ac42d18c27da52042f8d0a"
+    },
+    {
+      "path": "progressive/00001.npz",
+      "bytes": 55786840,
+      "sha256": "2f36117ea7726cc1a7f9a334bad2c4b012f0cd0507de884fe2233c76abf07778"
+    },
+    {
+      "path": "validation_colab.json",
+      "bytes": 745,
+      "sha256": "0ab833856c71998ed9db498046107fe2ee01c96693b13200cd72c1e1463d3ede"
+    }
+  ],
+  "bundles": [
+    {
+      "path": "part-00000.zip",
+      "bytes": 8556929,
+      "sha256": "fd4897f9cb6a08df76010ba8e1c50f973789e70d54482ce338c2c31855c7cb47"
+    },
+    {
+      "path": "part-00001.zip",
+      "bytes": 77928000,
+      "sha256": "c3ce3ad3c2fadca26ed323e1893c5e848833e09044136c439eb371b4f4bf94d8"
+    },
+    {
+      "path": "part-00002.zip",
+      "bytes": 55786980,
+      "sha256": "a7e154b2386d3860c54792cbdae6ffcc7f5df742c99297457841af4c8046b7b3"
+    },
+    {
+      "path": "part-00003.zip",
+      "bytes": 885,
+      "sha256": "9bc6e55983b080e46e6ebc13cd6880dd36f8517d2be11f0b44902b05431bbf86"
+    }
+  ],
+  "total_processed_bytes": 142271684
+}
