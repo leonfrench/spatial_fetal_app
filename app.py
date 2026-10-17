@@ -87,7 +87,8 @@ except (OSError,ValueError,KeyError) as exc:
     st.stop()
 paths = manifest['progressive']
 checksums = {f['path']:f['sha256'] for f in manifest['files']}
-rotation = {'GSM9629349':90,'GSM9629365':70,'GSM9629300':-100}.get(manifest['dataset'],0)
+rotation = {'GSM9629349':90,'GSM9629365':70,'GSM9629300':-20,
+            'GSM9629326':45,'GSM9629338':80}.get(manifest['dataset'],0)
 version = f"{DATA}:{manifest['created_utc']}:rotation={rotation}"
 if st.session_state.get('dataset_version') != version:
     st.session_state.dataset_version = version
