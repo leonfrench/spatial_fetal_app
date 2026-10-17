@@ -45,7 +45,7 @@ h1 {font-size:2rem !important; font-weight:650 !important; letter-spacing:-.04em
   50% {box-shadow:0 0 0 6px #187d9233; filter:brightness(1.18);}
 }
 body:has(.st-key-results_ready) .st-key-cycle_colour button[kind="primary"] {
-  animation:colors-ready-pulse 1.6s ease-in-out 1;
+  animation:colors-ready-pulse 1.6s ease-in-out 2;
 }
 @media (prefers-reduced-motion:reduce) {
   body:has(.st-key-results_ready) .st-key-cycle_colour button[kind="primary"] {animation:none;}
