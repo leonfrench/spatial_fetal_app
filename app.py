@@ -45,7 +45,7 @@ h1 {font-size:2rem !important; font-weight:650 !important; letter-spacing:-.04em
   50% {box-shadow:0 0 0 6px #187d9233; filter:brightness(1.18);}
 }
 body:has(.st-key-results_ready) .st-key-cycle_colour button[kind="primary"] {
-  animation:colors-ready-pulse 1.6s ease-in-out 3;
+  animation:colors-ready-pulse 1.6s ease-in-out 1;
 }
 @media (prefers-reduced-motion:reduce) {
   body:has(.st-key-results_ready) .st-key-cycle_colour button[kind="primary"] {animation:none;}
@@ -241,9 +241,10 @@ def render_progress():
                 if q.unknown_background: st.warning('Background genes not in dataset: '+', '.join(q.unknown_background))
                 if q.outside_background: st.warning('Targets outside background: '+', '.join(q.outside_background))
         label = ('Complete' if count==len(cells) else ('Scoring' if job['running'] else 'Stopped'))
-        st.progress(count/len(cells),text=f"{label} · {job['next_batch']} of {len(paths)} batches · vectorized scoring {job['compute_seconds']:.2f}s")
+        progress_text=f"{label} · {job['next_batch']} of {len(paths)} batches · vectorized scoring {job['compute_seconds']:.2f}s"
         if count==len(cells):
-            st.markdown('[Results ready — scroll down to the tissue enrichment table ↓](#tissue-results)')
+            progress_text+=' · [scroll down to the tissue enrichment table ↓](#tissue-results)'
+        st.progress(count/len(cells),text=progress_text)
     else:
         st.info('All bins are shown. Enter a valid target gene set to calculate AUROC automatically, or switch to tissue colours.')
     print(f"[timing] {timing_context} scoring_update_s={time.perf_counter()-render_started:.3f}",flush=True)
