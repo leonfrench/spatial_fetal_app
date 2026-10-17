@@ -37,10 +37,19 @@ h1 {font-size:2rem !important; font-weight:650 !important; letter-spacing:-.04em
 [data-testid="stSidebar"] .block-container {padding-top:1.5rem;}
 [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {gap:0.4rem;}
 [data-testid="stSidebar"] [data-testid="stCaptionContainer"] p {margin-bottom:0;}
-.st-key-cycle_colour button {background:#187D92 !important; color:white !important;
+.st-key-cycle_colour button[kind="primary"] {background:#187D92 !important; color:white !important;
  border:2px solid #126375 !important; min-height:3.4rem; box-shadow:0 2px 6px #187d9230;}
-.st-key-cycle_colour button p {font-size:1.12rem !important; font-weight:700 !important;}
-.st-key-cycle_colour button:hover {background:#126375 !important;}
+.st-key-cycle_colour button[kind="primary"] p {font-size:1.12rem !important; font-weight:700 !important;}
+.st-key-cycle_colour button[kind="primary"]:hover {background:#126375 !important;}
+@keyframes colors-ready-pulse {
+  50% {box-shadow:0 0 0 6px #187d9233; filter:brightness(1.18);}
+}
+body:has(.st-key-results_ready) .st-key-cycle_colour button[kind="primary"] {
+  animation:colors-ready-pulse 1.6s ease-in-out 3;
+}
+@media (prefers-reduced-motion:reduce) {
+  body:has(.st-key-results_ready) .st-key-cycle_colour button[kind="primary"] {animation:none;}
+}
 .st-key-spatial_chart_panel {gap:0.25rem;}
 </style>''',unsafe_allow_html=True)
 
@@ -149,8 +158,12 @@ with st.sidebar:
         st.session_state.colour_mode = modes[(modes.index(current)+1)%len(modes)]
     mode = st.session_state.colour_mode
     display_label = 'Tissue' if mode == 'Cell type' else mode
-    st.button(f'↻ Switch colors · {display_label}',key='cycle_colour',on_click=cycle_colour,width='stretch',type='primary',
+    st.button(f'Switch colors · {display_label}',key='cycle_colour',on_click=cycle_colour,width='stretch',type='primary',
         help='Cycle through gene-set AUROC, tissue colours, and tissue AUROC. Tissue AUROC unlocks after all batches finish; its scale follows the tissue-level values.')
+    if complete:
+        with st.container(key='results_ready'):
+            st.caption('Results ready! Click **Switch colors** to explore all three views, '
+                       'or [scroll down to the tissue results ↓](#tissue-results).')
     if st.session_state.query_error:
         st.error(st.session_state.query_error)
     unmapped_targets,unmapped_background = st.session_state.get('mapping_unmapped',([],[]))
@@ -229,6 +242,8 @@ def render_progress():
                 if q.outside_background: st.warning('Targets outside background: '+', '.join(q.outside_background))
         label = ('Complete' if count==len(cells) else ('Scoring' if job['running'] else 'Stopped'))
         st.progress(count/len(cells),text=f"{label} · {job['next_batch']} of {len(paths)} batches · vectorized scoring {job['compute_seconds']:.2f}s")
+        if count==len(cells):
+            st.markdown('[Results ready — scroll down to the tissue enrichment table ↓](#tissue-results)')
     else:
         st.info('All bins are shown. Enter a valid target gene set to calculate AUROC automatically, or switch to tissue colours.')
     print(f"[timing] {timing_context} scoring_update_s={time.perf_counter()-render_started:.3f}",flush=True)
@@ -268,9 +283,6 @@ def render_results():
         tile_chart(displayed['cells'],displayed['scores'],version=displayed['version'],
                    mode=displayed['mode'],type_aurocs=displayed['type_aurocs'],
                    filename=f"{displayed['dataset']}-spatial",rotation=displayed['rotation'])
-        st.caption('Overview blocks show mean scored AUROC, or majority tissue. Hover shows the tissue and AUROC of the bin nearest the block center; zoom in for individual bins. '
-                   'Unscored occupied blocks use a neighboring scored-block preview when available; empty blocks stay blank. '
-                   'Drag to pan, scroll to zoom, double-click to reset.')
     slice_total=len(cells)*len(genes)
     slice_zeros=slice_total-int(genes.n_cells_detected.sum())
     if job:
@@ -280,6 +292,7 @@ def render_results():
         st.caption(f'For expression sparsity, the matched target genes in your scoring universe are {target_zeros/target_total:.2%} zero (not detected), versus {slice_zeros/slice_total:.2%} across all retained genes in the full slice, independent of the background input; both percentages include all bins.')
     else:
         st.caption(f'For expression sparsity, {slice_zeros/slice_total:.2%} of entries across all bins and retained genes in the full slice are zero (not detected), independent of the background input.')
+    st.markdown('<span id="tissue-results"></span>',unsafe_allow_html=True)
     st.subheader('Tissue enrichment')
     st.caption('Ranks bins by their gene-set AUROC, then compares each tissue with all other tissues. AUROC > 0.5 = higher-ranked; < 0.5 = lower-ranked; 0.5 = no ranking preference.')
     if summary is None:
