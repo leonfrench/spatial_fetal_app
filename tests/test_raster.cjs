@@ -30,3 +30,13 @@ const empty=new Float64Array([NaN,NaN,NaN]);
 r=aggregate(centered,empty,4,'Gene-set AUROC',{});
 assert.equal(hoverText(centered,empty,r,0,'Gene-set AUROC',{}),'B\nAUROC: Not scored');
 console.log('Representative-bin hover tests passed');
+
+const {colorLimits}=require('../spatial_app/tile_component/raster.js');
+const percentileScores=Float64Array.from({length:101},(_,i)=>i/100);
+assert.deepEqual(colorLimits(percentileScores,'Gene-set AUROC'),[.01,.99]);
+assert.equal(percentileScores[0],0);assert.equal(percentileScores[100],1);
+assert.deepEqual(colorLimits([NaN,.2,.8],'Gene-set AUROC'),[.20600000000000002,.794]);
+assert.deepEqual(colorLimits(percentileScores,'Tissue AUROC',{A:.2,B:.8}),[.2,.8]);
+assert.deepEqual(colorLimits([NaN],'Gene-set AUROC'),[0,1]);
+assert.deepEqual(colorLimits([.5,.5],'Gene-set AUROC'),[.495,.505]);
+console.log('Percentile color limits passed; scores and tissue scale unchanged');

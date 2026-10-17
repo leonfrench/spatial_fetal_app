@@ -67,9 +67,11 @@ Rebuild this format on Colab with `--sampling spatial --shard-cells 32768
   target-versus-complement AUROC without needing the original counts.
 - `spatial_app/scoring.py` uses NumPy indexing, sorting and `bincount` over whole
   batches, with no per-cell scoring loop and no dense cells-by-genes matrix.
-- Colour limits are the min/max across currently scored observations and update
+- Per-bin AUROC colour limits are the 1st and 99th percentiles across currently scored observations and update
   after each batch. A constant result uses a narrow padded scale. The range
-  depends on completed batches, not the current zoom viewport.
+  depends on completed batches, not the current zoom viewport. Values outside
+  these limits use the endpoint colors; scores, hover values, statistics, and
+  downloads are unchanged. Tissue AUROC colors retain their own min/max scale.
 - Toggle **Colour by cell type** on for all 19 source labels; the colour key occupies a fixed area in both modes, preserving the viewport.
   The score calculation is preserved.
 - Drag to pan, scroll to zoom, double-click to reset, or save the current tissue

@@ -50,7 +50,17 @@ function hoverText(g,scores,raster,block,mode,aucs) {
  }
  return tissue+'\nAUROC: '+(Number.isFinite(value)?value.toFixed(4):'Not scored');
 }
+function colorLimits(scores,mode,aucs={}){
+ const values=Float64Array.from(mode==='Tissue AUROC'?Object.values(aucs):scores).filter(Number.isFinite);
+ if(!values.length)return [0,1];
+ values.sort();
+ const quantile=p=>{const pos=(values.length-1)*p,i=Math.floor(pos),f=pos-i;return values[i]+f*(values[Math.min(i+1,values.length-1)]-values[i]);};
+ let low=mode==='Gene-set AUROC'?quantile(.01):values[0];
+ let high=mode==='Gene-set AUROC'?quantile(.99):values[values.length-1];
+ if(low===high){low=Math.max(0,low-.005);high=Math.min(1,high+.005);}
+ return [low,high];
+}
 function factorForScale(scale,dpr=1){let f=1;while(f*2*scale*dpr<=1)f*=2;return f;}
-root.SpatialRaster={aggregate,factorForScale,hoverText};
+root.SpatialRaster={aggregate,factorForScale,hoverText,colorLimits};
 if(typeof module!=='undefined')module.exports=root.SpatialRaster;
 })(globalThis);

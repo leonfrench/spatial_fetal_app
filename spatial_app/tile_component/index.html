@@ -19,7 +19,7 @@ function schedule(){if(!frame)frame=requestAnimationFrame(()=>{frame=null;draw()
 function rgb(hex){return [1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));}
 const stops=['#32265C','#315B91','#23958B','#7ECF8D','#F3DD65'].map(rgb);
 function color(v){if(!Number.isFinite(v))return [212,220,228];const t=Math.max(0,Math.min(1,(v-low)/(high-low||1)))*4,i=Math.min(3,Math.floor(t)),f=t-i;return stops[i].map((x,j)=>Math.round(x+(stops[i+1][j]-x)*f));}
-function limits(){low=Infinity;high=-Infinity;const values=mode==='Tissue AUROC'?Object.values(aucs):scores;for(const v of values)if(Number.isFinite(v)){low=Math.min(low,v);high=Math.max(high,v);}if(!Number.isFinite(low)){low=0;high=1;}if(low===high){low=Math.max(0,low-.005);high=Math.min(1,high+.005);}}
+function limits(){[low,high]=SpatialRaster.colorLimits(scores,mode,aucs);}
 function legend(){const el=document.getElementById('legend');el.replaceChildren();const title=document.createElement('strong');title.textContent=mode==='Cell type'?'Tissue · AUROC':mode;el.append(title);
  if(mode==='Cell type'){g.labels.forEach((name,i)=>{const row=document.createElement('div');row.className='row';const sw=document.createElement('span');sw.className='swatch';sw.style.background=g.colors[i];row.append(sw,document.createTextNode(name+' ('+(Number.isFinite(aucs[name])?aucs[name].toFixed(2):'—')+')'));el.append(row);});}
  else{
@@ -31,6 +31,7 @@ function legend(){const el=document.getElementById('legend');el.replaceChildren(
    bar.append(tick);
   }
   el.append(bar);
+  if(mode==='Gene-set AUROC'){const note=document.createElement('div');note.textContent='Color limits: 1st–99th percentiles';el.append(note);}
  }}
 function draw(){if(!g)return;const started=performance.now(),dpr=window.devicePixelRatio||1,w=area.clientWidth,h=area.clientHeight;
  const factor=SpatialRaster.factorForScale(scale,dpr);
