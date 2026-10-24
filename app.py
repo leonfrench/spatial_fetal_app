@@ -11,7 +11,7 @@ from scripts.rank_io import load_shard
 from spatial_app.scoring import resolve_query, auroc_vectorized
 from spatial_app.view import score_limits
 from spatial_app.chart import tile_chart
-from spatial_app.enrichment import celltype_enrichment
+from spatial_app.enrichment import celltype_enrichment, MIN_BINS
 from spatial_app.orthologs import SPECIES, map_input
 
 ROOT = Path(__file__).resolve().parent
@@ -69,6 +69,12 @@ def metadata(path, version):
     return manifest,cells,genes
 
 
+@st.cache_data(show_spinner=False)
+def pseudobulk(path, version):
+    with np.load(Path(path)/'pseudobulk.npz', allow_pickle=False) as data:
+        return {key: data[key] for key in ('labels', 'counts', 'n_bins', 'symbols')}
+
+
 # Decoded CS23 batches total ~2.5 GiB. Retain only the current batch so
 # progressive scoring does not accumulate the whole dataset in server memory.
 @st.cache_resource(max_entries=1,show_spinner=False)
@@ -98,7 +104,7 @@ paths = manifest['progressive']
 checksums = {f['path']:f['sha256'] for f in manifest['files']}
 rotation = {'GSM9629349':90,'GSM9629365':70,'GSM9629300':-170,
             'GSM9629326':45,'GSM9629338':80}.get(manifest['dataset'],0)
-version = f"{DATA}:{manifest['created_utc']}:rotation={rotation}"
+version = f"{DATA}:{manifest['created_utc']}:rotation={rotation}:pseudobulk-v1"
 if st.session_state.get('dataset_version') != version:
     st.session_state.dataset_version = version
     st.session_state.scores = np.full(len(cells),np.nan)
@@ -148,11 +154,12 @@ with st.sidebar:
             st.session_state.query_error = str(exc)
     st.session_state.setdefault('colour_mode','Gene-set AUROC')
     complete = np.isfinite(st.session_state.scores).all()
-    if not complete and st.session_state.colour_mode == 'Tissue AUROC':
+    tissue_ready = st.session_state.get('enrichment_summary') is not None
+    if (not complete or not tissue_ready) and st.session_state.colour_mode == 'Tissue AUROC':
         st.session_state.colour_mode = 'Gene-set AUROC'
     def cycle_colour():
         modes = ['Gene-set AUROC','Cell type']
-        if np.isfinite(st.session_state.scores).all():
+        if np.isfinite(st.session_state.scores).all() and st.session_state.get('enrichment_summary') is not None:
             modes.append('Tissue AUROC')
         current = st.session_state.colour_mode
         st.session_state.colour_mode = modes[(modes.index(current)+1)%len(modes)]
@@ -258,11 +265,22 @@ def render_results():
     scores = st.session_state.scores
     count = int(np.isfinite(scores).sum())
     summary = st.session_state.get('enrichment_summary')
+    enrichment_error = None
     if count == len(cells) and summary is None:
         started = time.perf_counter()
         print(f"[timing] {timing_context} enrichment_start",flush=True)
-        summary = celltype_enrichment(cells.celltype.astype(str),scores)
-        st.session_state.enrichment_summary = summary
+        try:
+            bulk = pseudobulk(str(DATA),(DATA/'pseudobulk.npz').stat().st_mtime_ns)
+            if not np.array_equal(bulk['symbols'], genes.symbol.to_numpy(dtype=str)):
+                raise ValueError('Pseudobulk gene order does not match the scoring universe')
+            labels, sizes = np.unique(cells.celltype.astype(str), return_counts=True)
+            if not np.array_equal(bulk['labels'], labels) or not np.array_equal(bulk['n_bins'], sizes):
+                raise ValueError('Pseudobulk tissues do not match the selected slice')
+            q = job['query']
+            summary = celltype_enrichment(bulk['labels'],bulk['counts'],bulk['n_bins'],q.target,q.background)
+            st.session_state.enrichment_summary = summary
+        except (OSError, ValueError, KeyError) as exc:
+            enrichment_error = str(exc)
         print(f"[timing] {timing_context} enrichment_s={time.perf_counter()-started:.3f}",flush=True)
     type_aurocs = summary.set_index('Cell type')['AUROC'].to_dict() if summary is not None else {}
     displayed = st.session_state.get('displayed_plot')
@@ -295,20 +313,24 @@ def render_results():
         st.caption(f'For expression sparsity, {slice_zeros/slice_total:.2%} of entries across all bins and retained genes in the full slice are zero (not detected), independent of the background input.')
     st.markdown('<span id="tissue-results"></span>',unsafe_allow_html=True)
     st.subheader('Tissue enrichment')
-    st.caption('Ranks bins by their gene-set AUROC, then compares each tissue with all other tissues. AUROC > 0.5 = higher-ranked; < 0.5 = lower-ranked; 0.5 = no ranking preference.')
-    if summary is None:
+    st.caption('Sums raw counts within each tissue, converts to log₂(CPM + 1), and z-scores each gene across tissues. AUROC compares target genes with other genes by tissue specificity: > 0.5 = more specific; < 0.5 = less specific; 0.5 = no preference.')
+    if enrichment_error:
+        st.error(f'Tissue pseudobulks are unavailable: {enrichment_error}. Prepare pseudobulk.npz for this slice to calculate gene-based enrichment.')
+    elif summary is None:
         st.info('Tissue enrichment will be calculated once all batches are scored.')
     else:
         st.dataframe(summary,width='stretch',hide_index=True,height=(len(summary)+1)*35+3,
             column_config={
                 'Cell type':st.column_config.TextColumn('Tissue'),
-                'AUROC':st.column_config.NumberColumn(format='%.4f',help='Probability that a bin of this tissue scores higher than a bin of another tissue, with half credit for ties.'),
-                'p-value':st.column_config.NumberColumn(format='%.3e',help='Two-sided Mann–Whitney U test, with tie and continuity correction.'),
+                'Pseudobulk bins':st.column_config.NumberColumn(format='%d',help='Bins whose raw counts were summed; these are not the observations in the statistical test.'),
+                'AUROC':st.column_config.NumberColumn(format='%.4f',help='Probability that a target gene has higher specificity than a non-target gene in this tissue pseudobulk, with half credit for ties.'),
+                'p-value':st.column_config.NumberColumn(format='%.3e',help='Two-sided Mann–Whitney U test over genes, with tie and continuity correction.'),
                 'Corrected p-value (BH)':st.column_config.NumberColumn(format='%.3e',help='Benjamini–Hochberg correction across all annotated tissues in this query.')})
-        st.caption('Two-sided Mann–Whitney p-values; Benjamini–Hochberg correction across tissues for this query. Values that underflow to zero are reported at the smallest positive float (≈4.94 × 10⁻³²⁴). Bin-level tests assume independence; spatial correlation can make these p-values optimistic.')
+        st.caption(f'Two-sided Mann–Whitney p-values over genes; Benjamini–Hochberg correction across tissues. Custom backgrounds restrict the genes tested after normalization. Tissues need at least {MIN_BINS} bins and nonzero counts; at least two eligible tissues are required. Excluded tissues show missing statistics and count as p=1 for correction. Values that underflow are reported at the smallest positive float (≈4.94 × 10⁻³²⁴). Co-expressed genes are not independent, so p-values are exploratory.')
     if summary is not None:
         st.download_button('Download enrichment table',summary.to_csv(index=False).encode(),
                            file_name=f"{manifest['dataset']}-celltype-enrichment.csv",mime='text/csv',key='download_enrichment')
+    if count == len(cells):
         export=cells[['cell_index','source_obs_id','x','y','celltype']].copy()
         export['auroc']=scores
         st.download_button('Download bin scores',export.to_csv(index=False).encode(),

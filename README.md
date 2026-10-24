@@ -81,17 +81,26 @@ Rebuild this format on Colab with `--sampling spatial --shard-cells 32768
 
 The cell-type enrichment table is calculated once after all batches finish and
 reused until the slice or input query changes. Before completion it shows a
-waiting message. The table performs a second-level analysis:
-it ranks scored bins by their gene-set AUROC, then calculates a one-versus-rest
-AUROC for each annotation. Values above 0.5 indicate higher-ranking bins of
-that type; values below 0.5 indicate lower-ranking bins. This is not the mean
-or median of the original gene-set scores. Two-sided Mann–Whitney U p-values
-use the asymptotic distribution with tie and continuity correction. BH adjusted
-p-values correct across all annotated types for the current query (untestable
-types count as p=1 for correction but display missing values). Only fully scored queries produce enrichment results. Spatial correlation means
-bin-level independence is imperfect, so p-values are exploratory rather than
-replicate-level evidence. The table and individual-bin scores can be downloaded
-separately when scoring is complete.
+waiting message. Enrichment uses **count-summed tissue pseudobulks**, following
+[the Han StereoSeq implementation](https://github.com/leonfrench/polygenic_brain_Han_StereoSeq/blob/main/spatial_app/enrichment.py):
+raw counts are summed by tissue, transformed to log2(CPM + 1), and each gene is
+z-scored across eligible tissues in the selected slice. Genes with zero variance
+receive z=0. Tissues need at least 20 bins and nonzero counts; at least two eligible
+tissues are required. AUROC compares the target genes with non-target genes by
+specificity within each tissue. P-values therefore use **genes as observations**.
+Custom backgrounds restrict this comparison after normalization over all retained
+genes. Two-sided Mann–Whitney tests use tie and continuity correction. BH correction
+covers all annotated tissues (excluded tissues count as p=1 but show missing
+statistics). Co-expression can violate gene independence, so results remain
+exploratory. Tissue colors use these pseudobulk AUROCs; individual-bin scores are
+unchanged. The enrichment CSV includes pseudobulk bin and tested gene counts.
+
+Each export includes `pseudobulk.npz` (counts, tissue labels, bin counts, and ordered
+gene symbols) and `pseudobulk_validation.json`. To add these to an existing export,
+run `python scripts/prepare_pseudobulk.py DATA_DIR SOURCE.h5ad` on the preparation
+VM. It reuses `genes.parquet` source mappings, checks the original source SHA-256,
+checks observation order and labels, and verifies summed counts against the original
+per-gene totals. Rank-only files cannot reconstruct count pseudobulks.
 
 Rank-file caching is bounded to one batch to limit server memory use. A Streamlit fragment processes one
 batch per update, leaving the input controls usable. The scoring timer reports

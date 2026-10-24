@@ -92,7 +92,7 @@ def test_progressive_app_and_background_reset():
     assert not app.session_state['job']['running']
     table=app.dataframe[0].value
     assert len(table)==19
-    assert list(table.columns)==['Cell type','Scored bins','AUROC','p-value','Corrected p-value (BH)']
+    assert list(table.columns)==['Cell type','Pseudobulk bins','Target genes','Other genes','AUROC','p-value','Corrected p-value (BH)']
     # A new background discards ALL old scores and starts the new universe.
     app.text_area(key='background_input').set_value('SOX2 PAX6 ACTB GAPDH').run()
     assert not app.exception
@@ -131,10 +131,10 @@ def test_enrichment_only_once_per_completed_query(monkeypatch):
     import spatial_app.enrichment as enrichment
     original=enrichment.celltype_enrichment
     calls=[]
-    def counted(labels,scores):
-        assert np.isfinite(scores).all()
+    def counted(labels,counts,n_bins,target,background):
+        assert counts.ndim==2 and counts.shape[0]==len(labels)
         calls.append(1)
-        return original(labels,scores)
+        return original(labels,counts,n_bins,target,background)
     monkeypatch.setattr(enrichment,'celltype_enrichment',counted)
     app=AppTest.from_file(str(Path(__file__).resolve().parents[1]/'app.py'),default_timeout=30).run()
     assert not calls
@@ -176,3 +176,22 @@ def test_plot_updates_after_each_batch_and_retains_results_for_invalid_input():
     assert not app.exception
     assert app.session_state['displayed_plot']['dataset']=='GSM9629365'
     assert np.isfinite(app.session_state['displayed_plot']['scores']).sum()==32768
+
+
+def test_tissue_view_uses_gene_based_pseudobulk_statistics():
+    from spatial_app.enrichment import celltype_enrichment
+    root=Path(__file__).resolve().parents[1]
+    app=AppTest.from_file(str(root/'app.py'),default_timeout=30).run()
+    app.run()
+    query=app.session_state['job']['query']
+    with np.load(root/'data/GSM9629296/pseudobulk.npz',allow_pickle=False) as bulk:
+        expected=celltype_enrichment(bulk['labels'],bulk['counts'],bulk['n_bins'],query.target,query.background)
+    import pandas as pd
+    pd.testing.assert_frame_equal(app.dataframe[0].value,expected)
+    assert expected['Pseudobulk bins'].sum()==13257
+    assert (expected['Target genes']==len(query.target)).all()
+    app.button(key='cycle_colour').click().run()
+    app.button(key='cycle_colour').click().run()
+    assert app.session_state['displayed_plot']['mode']=='Tissue AUROC'
+    for label, auc in app.session_state['displayed_plot']['type_aurocs'].items():
+        np.testing.assert_equal(auc,expected.set_index('Cell type').loc[label,'AUROC'])

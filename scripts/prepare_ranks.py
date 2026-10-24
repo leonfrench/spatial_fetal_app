@@ -138,6 +138,9 @@ def main():
         indices = np.lib.format.open_memmap(base/'indices.tmp.npy',mode='w+',dtype='int32',shape=(total_nnz,))
         indptr = np.zeros(n+1,dtype=np.int64)
         zero2 = np.zeros(n,dtype=np.uint16)
+        bulk_labels, bulk_codes = np.unique(obs.celltype.astype(str), return_inverse=True)
+        bulk_counts = np.zeros((len(bulk_labels), g), dtype=np.float64)
+        bulk_bins = np.bincount(bulk_codes, minlength=len(bulk_labels))
         offset=0
         rng = np.random.default_rng(seed)
         validation_rows = set(rng.choice(n,min(n,64),replace=False).tolist())
@@ -145,6 +148,10 @@ def main():
         for start in range(0,n,256):
             x = (csr_rows(group,start,min(start+256,n)) @ projection).tocsr()
             x.eliminate_zeros(); x.sort_indices()
+            grouping = sparse.csr_matrix((np.ones(x.shape[0]),
+                (bulk_codes[start:start+x.shape[0]], np.arange(x.shape[0]))),
+                shape=(len(bulk_labels), x.shape[0]))
+            bulk_counts += (grouping @ x).toarray()
             for j in range(x.shape[0]):
                 row = start+j
                 a,b=x.indptr[j:j+2]; values=x.data[a:b]; cols=x.indices[a:b]
@@ -167,6 +174,16 @@ def main():
                     np.testing.assert_allclose(auc,truth,atol=1e-14)
                     validated+=1
             if start%2048==0: print('ranked',min(start+256,n),'/',n,flush=True)
+        np.testing.assert_array_equal(bulk_counts.sum(axis=0), totals[keep])
+        np.savez_compressed(out/'pseudobulk.npz', counts=bulk_counts,
+            labels=bulk_labels.astype(str), n_bins=bulk_bins, symbols=symbols.astype(str))
+        bulk_entry = record(out/'pseudobulk.npz')
+        (out/'pseudobulk_validation.json').write_text(json.dumps(dict(
+            method='sum raw mapped counts by celltype',
+            validation='aggregated in the validated rank-export pass; per-gene totals match',
+            n_bins=int(bulk_bins.sum()), n_profiles=len(bulk_labels), n_genes=g,
+            sha256=bulk_entry['sha256']), indent=2)+'\n')
+        record(out/'pseudobulk_validation.json')
         assert offset==total_nnz
         rank2.flush(); indices.flush()
         def rank_rows(rows):

@@ -133,6 +133,16 @@
       ],
       "sampling_order_min": 32768,
       "sampling_order_max": 56278
+    },
+    {
+      "path": "pseudobulk.npz",
+      "bytes": 674803,
+      "sha256": "881d741ef28f60f66b0853695ae0d77e4a37b66f315f2c34b1bd9106e7bb5f9a"
+    },
+    {
+      "path": "pseudobulk_validation.json",
+      "bytes": 388,
+      "sha256": "7701d75f8494aaf99d1768595cfe95ca6a00a8740818b18f9dea07796582017c"
     }
   ],
   "progressive": [

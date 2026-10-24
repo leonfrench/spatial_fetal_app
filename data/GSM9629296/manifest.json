@@ -102,6 +102,16 @@
       "path": "cells.parquet",
       "bytes": 1332209,
       "sha256": "b56945132747d63f99c7f716ee389eb45d969a3ea0ae0254b98b668164053713"
+    },
+    {
+      "path": "pseudobulk.npz",
+      "bytes": 636753,
+      "sha256": "fb9c80902beae164055e6fd9ff3c51a26e72e9065f92cb786d999967874dbfac"
+    },
+    {
+      "path": "pseudobulk_validation.json",
+      "bytes": 388,
+      "sha256": "f9ce8135a834b4343826f7142637fd8182233ebade1ec64c0f9926b9942e1240"
     }
   ],
   "progressive": [

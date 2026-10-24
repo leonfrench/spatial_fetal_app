@@ -1,0 +1,9 @@
+{
+  "method": "sum raw mapped counts by celltype",
+  "source_sha256": "6d0d0b848d0ba940a8a868b0a50a8e79f6598dcb8dfb4816a6ef2e51b00b5bb7",
+  "validation": "source checksum, observation order/labels, and per-gene count totals match original export",
+  "n_bins": 56279,
+  "n_profiles": 18,
+  "n_genes": 18144,
+  "sha256": "881d741ef28f60f66b0853695ae0d77e4a37b66f315f2c34b1bd9106e7bb5f9a"
+}

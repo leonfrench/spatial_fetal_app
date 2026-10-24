@@ -21,6 +21,15 @@ def main(directory):
     np.testing.assert_array_equal(cells.cell_index,np.arange(n))
     np.testing.assert_array_equal(genes.gene_index,np.arange(g))
     assert genes.symbol.is_unique and cells.source_obs_id.is_unique
+    if (root/'pseudobulk.npz').exists():
+        with np.load(root/'pseudobulk.npz', allow_pickle=False) as bulk:
+            np.testing.assert_array_equal(bulk['symbols'], genes.symbol.astype(str))
+            np.testing.assert_array_equal(bulk['counts'].sum(axis=0), genes.total_counts)
+            labels, sizes = np.unique(cells.celltype.astype(str), return_counts=True)
+            np.testing.assert_array_equal(bulk['labels'], labels)
+            np.testing.assert_array_equal(bulk['n_bins'], sizes)
+            assert bulk['counts'].shape == (len(labels), g)
+            assert np.isfinite(bulk['counts']).all() and (bulk['counts'] >= 0).all()
     load_times=[]; auc_times=[]; fingerprints=np.empty((n,32),dtype=np.uint8); pairwise_checks=0
     chosen,missing=resolve_symbols(genes,['SOX2','PAX6','NES','DCX','TUBB3'])
     if not chosen or len(chosen)==g:
