@@ -11,7 +11,7 @@ from scripts.rank_io import load_shard
 from spatial_app.scoring import resolve_query, auroc_vectorized
 from spatial_app.view import score_limits
 from spatial_app.chart import tile_chart
-from spatial_app.enrichment import celltype_enrichment, MIN_BINS
+from spatial_app.enrichment import celltype_enrichment, MIN_BINS, format_p_value
 from spatial_app.orthologs import SPECIES, map_input
 
 ROOT = Path(__file__).resolve().parent
@@ -319,13 +319,14 @@ def render_results():
     elif summary is None:
         st.info('Tissue enrichment will be calculated once all batches are scored.')
     else:
-        st.dataframe(summary,width='stretch',hide_index=True,height=(len(summary)+1)*35+3,
+        st.dataframe(summary.style.format({'AUROC':'{:.4f}', 'p-value':format_p_value,
+                                          'Corrected p-value (BH)':format_p_value}),width='stretch',hide_index=True,height=(len(summary)+1)*35+3,
             column_config={
                 'Cell type':st.column_config.TextColumn('Tissue'),
                 'Pseudobulk bins':st.column_config.NumberColumn(format='%d',help='Bins whose raw counts were summed; these are not the observations in the statistical test.'),
                 'AUROC':st.column_config.NumberColumn(format='%.4f',help='Probability that a target gene has higher specificity than a non-target gene in this tissue pseudobulk, with half credit for ties.'),
-                'p-value':st.column_config.NumberColumn(format='%.3e',help='Two-sided Mann–Whitney U test over genes, with tie and continuity correction.'),
-                'Corrected p-value (BH)':st.column_config.NumberColumn(format='%.3e',help='Benjamini–Hochberg correction across all annotated tissues in this query.')})
+                'p-value':st.column_config.NumberColumn(help='Two-sided Mann–Whitney U test over genes, with tie and continuity correction.'),
+                'Corrected p-value (BH)':st.column_config.NumberColumn(help='Benjamini–Hochberg correction across all annotated tissues in this query.')})
         st.caption(f'Two-sided Mann–Whitney p-values over genes; Benjamini–Hochberg correction across tissues. Custom backgrounds restrict the genes tested after normalization. Tissues need at least {MIN_BINS} bins and nonzero counts; at least two eligible tissues are required. Excluded tissues show missing statistics and count as p=1 for correction. Values that underflow are reported at the smallest positive float (≈4.94 × 10⁻³²⁴). Co-expressed genes are not independent, so p-values are exploratory.')
     if summary is not None:
         st.download_button('Download enrichment table',summary.to_csv(index=False).encode(),

@@ -3,6 +3,7 @@
 Matches the Han StereoSeq approach: log2(CPM + 1), gene-wise z-scores
 across eligible tissues, then a target-versus-complement test over genes.
 """
+import re
 import numpy as np
 import pandas as pd
 from scipy.stats import mannwhitneyu, false_discovery_control
@@ -68,3 +69,12 @@ def celltype_enrichment(labels, counts, n_bins, target_indices, background_indic
                           'p-value': np.where(p == 0, floor, p),
                           'Corrected p-value (BH)': np.where(corrected == 0, floor, corrected)})
     return table.sort_values(['AUROC', 'Cell type'], ascending=[False, True], na_position='last').reset_index(drop=True)
+
+
+def format_p_value(p):
+    """Three significant digits: standard notation from 1e-4 up, scientific below."""
+    if not np.isfinite(p):
+        return ''
+    if p >= 1e-4:
+        return f'{p:.3g}'
+    return re.sub(r'e([+-])0*(\d)', r'e\1\2', f'{p:.2e}')
